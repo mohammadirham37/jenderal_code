@@ -23,14 +23,15 @@ import (
 
 // AppContext dependensi aplikasi yang dibagikan ke TUI.
 type AppContext struct {
-	Cfg   *config.Config
-	Reg   *provider.Registry
-	Store *session.Store
+	Cfg     *config.Config
+	Reg     *provider.Registry
+	Store   *session.Store
+	Version string
 }
 
 // chatBlock satu bagian tampilan chat.
 type chatBlock struct {
-	kind      string // user | assistant | tool | status | error
+	kind      string // banner | user | assistant | tool | status | error
 	text      string
 	streaming bool
 }
@@ -133,6 +134,8 @@ func NewModel(app *AppContext, ag *agent.Agent) Model {
 	m.buildPalette()
 	m.loadAgents()
 	m.loadHistory()
+	// Banner selalu blok pertama, juga saat sesi lama dimuat ulang.
+	m.blocks = append([]chatBlock{{kind: "banner"}}, m.blocks...)
 	m.branch = gitBranch(ag.Sess.ProjectPath)
 	return m
 }
@@ -281,7 +284,7 @@ func (m *Model) handleSlash(input string) bool {
 		if sess, err := m.app.Store.CreateSession(m.ag.Sess.ProjectPath, "", m.app.Cfg.Model()); err == nil {
 			if newAg, err := m.newAgentFor(sess); err == nil {
 				m.ag = newAg
-				m.blocks = nil
+				m.blocks = []chatBlock{{kind: "banner"}}
 				m.tokensIn, m.tokensOut, m.costUSD = 0, 0, 0
 				m.statusMsg = m.lang.get("new_session") + ": " + sess.ID
 			}

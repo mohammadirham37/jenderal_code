@@ -392,5 +392,5 @@ func launchTUI(a *app, continueLast bool, sessID string) error {
 			fmt.Fprintln(os.Stderr, "  Ollama lokal tidak butuh API key: pastikan `ollama serve` berjalan.")
 		}
 	}
-	return tui.Run(&tui.AppContext{Cfg: a.cfg, Reg: a.reg, Store: a.store}, sess, nil)
+	return tui.Run(&tui.AppContext{Cfg: a.cfg, Reg: a.reg, Store: a.store, Version: Version}, sess, nil)
 }

@@ -131,6 +131,8 @@ func (m *Model) renderBlocks() string {
 	}
 	for _, b := range m.blocks {
 		switch b.kind {
+		case "banner":
+			out = append(out, m.renderBannerBlock(), "")
 		case "user":
 			bubble := lipgloss.NewStyle().
 				Background(m.th.UserBg).Foreground(m.th.UserFg).

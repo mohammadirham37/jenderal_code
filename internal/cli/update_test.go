@@ -37,7 +37,7 @@ func TestShortOf(t *testing.T) {
 
 func TestDetectSourceDir(t *testing.T) {
 	repo := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(repo, "cmd", "jenderal"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(repo, "cmd", "jenderalcode"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(repo, ".git"), []byte("gitdir: x"), 0o644); err != nil {
@@ -46,7 +46,7 @@ func TestDetectSourceDir(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(repo, "go.mod"), []byte("module "+modulePath+"\n\ngo 1.27\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	exe := filepath.Join(repo, "cmd", "jenderal", "jenderal")
+	exe := filepath.Join(repo, "cmd", "jenderalcode", "jenderal")
 	got, err := detectSourceDir(exe)
 	if err != nil {
 		t.Fatalf("detectSourceDir: %v", err)
@@ -55,9 +55,9 @@ func TestDetectSourceDir(t *testing.T) {
 		t.Errorf("detectSourceDir = %q, want %q", got, repo)
 	}
 
-	// Bukan repo jenderal → harus gagal.
+	// Bukan repo jenderalcode → harus gagal.
 	other := t.TempDir()
-	if _, err := detectSourceDir(filepath.Join(other, "jenderal")); err == nil {
+	if _, err := detectSourceDir(filepath.Join(other, "jenderalcode")); err == nil {
 		t.Error("detectSourceDir berhasil di luar repo; harusnya error")
 	}
 }
@@ -71,6 +71,6 @@ func TestIsJenderalSourceModuleMismatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	if isJenderalSource(dir) {
-		t.Error("go.mod module berbeda harusnya tidak dikenali sebagai source jenderal")
+		t.Error("go.mod module berbeda harusnya tidak dikenali sebagai source jenderalcode")
 	}
 }

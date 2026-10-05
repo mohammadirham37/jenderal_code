@@ -56,10 +56,10 @@ Pengguna utama adalah developer individu yang nyaman di terminal; pengguna sekun
 
 ### User story utama
 
-- Sebagai developer, saya ingin mengetik `jenderal` di folder proyek dan langsung meminta agen memperbaiki bug, agar tidak perlu pindah ke browser.
+- Sebagai developer, saya ingin mengetik `jenderalcode` di folder proyek dan langsung meminta agen memperbaiki bug, agar tidak perlu pindah ke browser.
 - Sebagai pengguna hemat biaya, saya ingin memakai GLM untuk tugas ringan dan model premium untuk refactor besar, agar biaya tetap rendah.
 - Sebagai tech lead, saya ingin menyimpan aturan proyek di file `JENDERAL.md`, agar agen mengikuti konvensi tim.
-- Sebagai DevOps, saya ingin menjalankan `jenderal run "..." --json` di pipeline CI, agar review kode otomatis.
+- Sebagai DevOps, saya ingin menjalankan `jenderalcode run "..." --json` di pipeline CI, agar review kode otomatis.
 - Sebagai pengguna desktop, saya ingin melihat diff sebelum perubahan diterapkan, agar saya tetap memegang kendali.
 
 ## 4. Lingkup Produk
@@ -68,9 +68,9 @@ JenderalCode terdiri dari satu engine inti (`jenderal-core`) dan tiga antarmuka 
 
 | Antarmuka | Deskripsi | Teknologi | Target rilis |
 | --- | --- | --- | --- |
-| CLI non-interaktif | `jenderal run "prompt"` untuk skrip dan CI, output teks atau JSON | Cobra | v0.1 |
+| CLI non-interaktif | `jenderalcode run "prompt"` untuk skrip dan CI, output teks atau JSON | Cobra | v0.1 |
 | TUI interaktif | Chat penuh di terminal: daftar sesi, diff, dialog izin, pemilih model | Bubble Tea + Lip Gloss + Glamour | v0.2 |
-| Server headless | `jenderal serve` membuka HTTP + SSE API lokal untuk klien lain (desktop, ekstensi editor) | net/http + chi | v0.3 |
+| Server headless | `jenderalcode serve` membuka HTTP + SSE API lokal untuk klien lain (desktop, ekstensi editor) | net/http + chi | v0.3 |
 | Desktop | Aplikasi GUI dengan panel chat, file tree, diff viewer, pengaturan provider | Wails v2 (Go backend + webview native) | v0.5 |
 
 ### Kenapa Wails untuk desktop
@@ -213,8 +213,8 @@ type StreamEvent struct {
 - Normalisasi format tool calling antar provider ke satu skema internal (JSON Schema).
 - Fallback untuk model tanpa native tool calling: tool dijelaskan di prompt dan dipanggil via blok XML/JSON yang diparse.
 - Retry dengan exponential backoff untuk error 429 dan 5xx (maks 5 kali), menghormati header `retry-after`.
-- Katalog model dan harga: file bawaan yang diperbarui per rilis, plus `jenderal models --refresh` untuk mengambil versi terbaru.
-- Login: `jenderal auth login <provider>` menyimpan API key di keychain OS (Keychain, Credential Manager, Secret Service); fallback file terenkripsi.
+- Katalog model dan harga: file bawaan yang diperbarui per rilis, plus `jenderalcode models --refresh` untuk mengambil versi terbaru.
+- Login: `jenderalcode auth login <provider>` menyimpan API key di keychain OS (Keychain, Credential Manager, Secret Service); fallback file terenkripsi.
 - Variabel lingkungan standar dibaca otomatis (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `ZAI_API_KEY`, dll.).
 - Model terpisah untuk tugas kecil (judul sesi, ringkasan kompaksi) agar hemat biaya.
 - Ganti model di tengah sesi dengan `/model` tanpa kehilangan riwayat.
@@ -239,7 +239,7 @@ Antarmuka mengirim perintah ke core; core memanggil provider, tool, dan integras
 ```text
 jenderalcode/
 ├── cmd/
-│   ├── jenderal/            # entry CLI + TUI + serve
+│   ├── jenderalcode/        # entry CLI + TUI + serve
 │   └── jenderal-desktop/    # entry Wails
 ├── internal/
 │   ├── agent/       # loop, mode, sub-agen, kompaksi
@@ -292,7 +292,7 @@ jenderalcode/
 ### 7.5 Distribusi
 
 - Install: `curl -fsSL https://jenderalcode.dev/install | sh`, `brew install jenderalcode`, `scoop install jenderalcode`, `go install`, paket deb/rpm/AUR.
-- Auto-update via `jenderal upgrade` dengan verifikasi checksum dan tanda tangan.
+- Auto-update via `jenderalcode upgrade` dengan verifikasi checksum dan tanda tangan.
 
 ## 8. Kebutuhan Non-Fungsional
 
@@ -340,23 +340,23 @@ Target performa diukur di laptop referensi (4 core, RAM 8 GB, SSD) dan menjadi s
 
 ## 9. Pengalaman Pengguna (UX)
 
-Perintah utama adalah `jenderal` (alias pendek `jc`); menjalankannya tanpa argumen langsung membuka TUI di direktori saat ini.
+Perintah utama adalah `jenderalcode` (alias pendek `jc`); menjalankannya tanpa argumen langsung membuka TUI di direktori saat ini.
 
 ### 9.1 Perintah CLI
 
 | Perintah | Fungsi |
 | --- | --- |
-| `jenderal` | Buka TUI interaktif di folder saat ini |
-| `jenderal run "<prompt>"` | Jalankan satu tugas non-interaktif; `--json`, `--model`, `--agent`, `--yolo` |
-| `jenderal serve [--port 4096]` | Jalankan server HTTP + SSE lokal |
-| `jenderal desktop` | Buka aplikasi desktop di folder saat ini |
-| `jenderal auth login\|logout\|list` | Kelola kredensial provider |
-| `jenderal models [--refresh]` | Daftar model yang tersedia beserta harga |
-| `jenderal sessions list\|export\|import\|rm` | Kelola sesi |
-| `jenderal mcp add\|list\|rm` | Kelola server MCP |
-| `jenderal init` | Buat `JENDERAL.md` dari analisis repo |
-| `jenderal stats` | Ringkasan penggunaan token dan biaya |
-| `jenderal upgrade` | Perbarui ke versi terbaru |
+| `jenderalcode` | Buka TUI interaktif di folder saat ini |
+| `jenderalcode run "<prompt>"` | Jalankan satu tugas non-interaktif; `--json`, `--model`, `--agent`, `--yolo` |
+| `jenderalcode serve [--port 4096]` | Jalankan server HTTP + SSE lokal |
+| `jenderalcode desktop` | Buka aplikasi desktop di folder saat ini |
+| `jenderalcode auth login\|logout\|list` | Kelola kredensial provider |
+| `jenderalcode models [--refresh]` | Daftar model yang tersedia beserta harga |
+| `jenderalcode sessions list\|export\|import\|rm` | Kelola sesi |
+| `jenderalcode mcp add\|list\|rm` | Kelola server MCP |
+| `jenderalcode init` | Buat `JENDERAL.md` dari analisis repo |
+| `jenderalcode stats` | Ringkasan penggunaan token dan biaya |
+| `jenderalcode upgrade` | Perbarui ke versi terbaru |
 
 ### 9.2 Slash command di TUI dan desktop
 

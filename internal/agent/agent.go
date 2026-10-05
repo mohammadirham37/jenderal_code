@@ -216,7 +216,7 @@ func (a *Agent) Run(ctx context.Context, input string) (string, error) {
 		return "", fmt.Errorf("agen sedang berjalan; tekan Esc untuk menghentikan")
 	}
 	if a.Model == "" {
-		return "", fmt.Errorf("model belum diatur; jalankan `jenderal auth login <provider>` lalu set model di jenderal.jsonc atau /model")
+		return "", fmt.Errorf("model belum diatur; jalankan `jenderalcode auth login <provider>` lalu set model di jenderal.jsonc atau /model")
 	}
 	runCtx, cancel := context.WithCancel(ctx)
 	a.ctx = runCtx

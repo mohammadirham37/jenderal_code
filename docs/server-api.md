@@ -1,6 +1,6 @@
 # Server API & SDK
 
-`jenderal serve` membuka API HTTP + SSE di `127.0.0.1` (bind lain ditolak).
+`jenderalcode serve` membuka API HTTP + SSE di `127.0.0.1` (bind lain ditolak).
 Setiap start menghasilkan token acak yang harus dikirim pada setiap request
 sebagai header `X-Jenderal-Token`, `Authorization: Bearer <token>`, atau query
 `?token=`. Kecuali `/health`, semua endpoint menuntut token.
@@ -41,7 +41,7 @@ Setiap event berformat `event: <type>` + `data: <json>`:
 ## Contoh dengan curl
 
 ```sh
-TOKEN=...   # dicetak saat `jenderal serve` start
+TOKEN=...   # dicetak saat `jenderalcode serve` start
 BASE=http://127.0.0.1:4096
 
 SID=$(curl -s -X POST -H "X-Jenderal-Token: $TOKEN" \

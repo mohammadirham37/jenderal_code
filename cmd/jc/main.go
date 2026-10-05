@@ -1,4 +1,4 @@
-// Command jc adalah alias pendek untuk jenderal (PRD 9).
+// Command jc adalah alias pendek untuk jenderalcode (PRD 9).
 package main
 
 import (

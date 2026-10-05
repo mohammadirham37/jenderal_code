@@ -329,7 +329,7 @@ func serveCmd() *cobra.Command {
 			defer a.store.Close()
 			srv := server.New(server.Options{Config: a.cfg, Registry: a.reg, Store: a.store})
 			addr := fmt.Sprintf("127.0.0.1:%d", port)
-			fmt.Printf("jenderal server berjalan di http://%s\n", addr)
+			fmt.Printf("jenderalcode server berjalan di http://%s\n", addr)
 			fmt.Printf("token akses: %s\n", srv.Token())
 			fmt.Println("endpoint: POST /session · GET /session · POST /session/{id}/message · GET /session/{id}/events (SSE) · POST /session/{id}/abort · GET /models")
 			ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -353,8 +353,8 @@ func desktopCmd() *cobra.Command {
 		Short: "Buka aplikasi desktop (Wails) — belum tersedia di rilis ini",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("aplikasi desktop (Wails) direncanakan untuk v0.5; sementara gunakan:\n" +
-				"  jenderal            (TUI)\n" +
-				"  jenderal serve      (API untuk klien GUI)")
+				"  jenderalcode         (TUI)\n" +
+				"  jenderalcode serve      (API untuk klien GUI)")
 		},
 	}
 }
@@ -384,11 +384,11 @@ func launchTUI(a *app, continueLast bool, sessID string) error {
 	if a.cfg.Model() == "" {
 		ready := a.reg.IDs()
 		sort.Strings(ready)
-		fmt.Fprintln(os.Stderr, "Catatan: belum ada model default. Atur \"model\" di jenderal.jsonc atau jalankan `jenderal auth login <provider>` lalu pilih model dengan /model di dalam TUI.")
+		fmt.Fprintln(os.Stderr, "Catatan: belum ada model default. Atur \"model\" di jenderal.jsonc atau jalankan `jenderalcode auth login <provider>` lalu pilih model dengan /model di dalam TUI.")
 		if len(ready) == 0 {
 			fmt.Fprintln(os.Stderr, "Tidak ada provider dengan kredensial. Contoh cepat:")
 			fmt.Fprintln(os.Stderr, "  export ZAI_API_KEY=...        # atau OPENAI_API_KEY, ANTHROPIC_API_KEY, dll.")
-			fmt.Fprintln(os.Stderr, "  jenderal auth login zai       # simpan permanen")
+			fmt.Fprintln(os.Stderr, "  jenderalcode auth login zai       # simpan permanen")
 			fmt.Fprintln(os.Stderr, "  Ollama lokal tidak butuh API key: pastikan `ollama serve` berjalan.")
 		}
 	}

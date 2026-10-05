@@ -69,7 +69,7 @@ func authCmd() *cobra.Command {
 				return err
 			}
 			if _, ok := provider.ResolveKey(provID, def.EnvKey, "", store); ok {
-				fmt.Printf("✔ API key %s tersimpan. Uji dengan: jenderal models\n", provID)
+				fmt.Printf("✔ API key %s tersimpan. Uji dengan: jenderalcode models\n", provID)
 			}
 			return nil
 		},
@@ -108,7 +108,7 @@ func authCmd() *cobra.Command {
 					continue
 				}
 				if p.RequiresKey {
-					fmt.Fprintf(w, "%s\t✗ belum\t(jalankan: jenderal auth login %s)\n", p.ID, p.ID)
+					fmt.Fprintf(w, "%s\t✗ belum\t(jalankan: jenderalcode auth login %s)\n", p.ID, p.ID)
 				} else {
 					fmt.Fprintf(w, "%s\tlokal\t%s\n", p.ID, p.BaseURL)
 				}
@@ -446,13 +446,13 @@ func mcpCmd() *cobra.Command {
 		&cobra.Command{
 			Use:   "add <nama> -- <command> [args...]",
 			Short: "Tambah server MCP lokal ke konfigurasi proyek (--global untuk global)",
-			Example: `jenderal mcp add db -- npx -y @example/mcp-postgres
-jenderal mcp add github --global -- npx -y @modelcontextprotocol/server-github`,
+			Example: `jenderalcode mcp add db -- npx -y @example/mcp-postgres
+jenderalcode mcp add github --global -- npx -y @modelcontextprotocol/server-github`,
 			RunE: func(cmd *cobra.Command, args []string) error {
 				global, _ := cmd.Flags().GetBool("global")
 				remote, _ := cmd.Flags().GetString("url")
 				if len(args) < 1 {
-					return fmt.Errorf("sebutkan nama server; contoh: jenderal mcp add db -- npx -y @example/mcp-postgres")
+					return fmt.Errorf("sebutkan nama server; contoh: jenderalcode mcp add db -- npx -y @example/mcp-postgres")
 				}
 				name := args[0]
 				entry := map[string]any{}
@@ -492,7 +492,7 @@ jenderal mcp add github --global -- npx -y @modelcontextprotocol/server-github`,
 				defer a.store.Close()
 				servers := a.cfg.MCPServers()
 				if len(servers) == 0 {
-					fmt.Println("belum ada server MCP; tambahkan dengan `jenderal mcp add <nama> -- <command>`")
+					fmt.Println("belum ada server MCP; tambahkan dengan `jenderalcode mcp add <nama> -- <command>`")
 					return nil
 				}
 				names := make([]string, 0, len(servers))
@@ -657,7 +657,7 @@ func upgradeCmd() *cobra.Command {
 			if err != nil || resp.StatusCode != 200 {
 				fmt.Println("tidak bisa memeriksa pembaruan (repo rilis belum tersedia).")
 				fmt.Println("Perbarui manual:")
-				fmt.Println("  go install github.com/mohammadirham37/jenderal_code/cmd/jenderal@latest")
+				fmt.Println("  go install github.com/mohammadirham37/jenderal_code/cmd/jenderalcode@latest")
 				if resp != nil {
 					resp.Body.Close()
 				}

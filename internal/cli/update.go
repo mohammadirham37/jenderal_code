@@ -51,7 +51,7 @@ func runUpdate(source string, checkOnly, force bool) error {
 		return err
 	}
 	if strings.Contains(exe, "go-build") {
-		return fmt.Errorf("binary berjalan dari cache `go run`; bangun dulu dengan `go build -o jenderal ./cmd/jenderal`, lalu jalankan `jenderal update`")
+		return fmt.Errorf("binary berjalan dari cache `go run`; bangun dulu dengan `go build -o jenderalcode ./cmd/jenderalcode`, lalu jalankan `jenderalcode update`")
 	}
 
 	src := source
@@ -102,7 +102,7 @@ func runUpdate(source string, checkOnly, force bool) error {
 		return nil
 	}
 	if checkOnly {
-		fmt.Println("pembaruan tersedia; jalankan `jenderal update` untuk memasang.")
+		fmt.Println("pembaruan tersedia; jalankan `jenderalcode update` untuk memasang.")
 		return nil
 	}
 
@@ -125,14 +125,14 @@ func runUpdate(source string, checkOnly, force bool) error {
 
 	goBin, err := exec.LookPath("go")
 	if err != nil {
-		return fmt.Errorf("perintah `go` tidak ada di PATH; pasang Go atau build manual: go build -o %s ./cmd/jenderal", exe)
+		return fmt.Errorf("perintah `go` tidak ada di PATH; pasang Go atau build manual: go build -o %s ./cmd/jenderalcode", exe)
 	}
 	ld := fmt.Sprintf("-s -w -X '%s.Version=%s' -X '%s.Commit=%s' -X '%s.Date=%s'",
 		modulePath+"/internal/cli", ver, modulePath+"/internal/cli", newCommit, modulePath+"/internal/cli", date)
 
 	fmt.Printf("membangun binary baru (versi %s, commit %s) ...\n", ver, shortOf(newCommit))
 	tmp := filepath.Join(filepath.Dir(exe), "."+filepath.Base(exe)+".new")
-	build := exec.Command(goBin, "build", "-ldflags", ld, "-o", tmp, "./cmd/jenderal")
+	build := exec.Command(goBin, "build", "-ldflags", ld, "-o", tmp, "./cmd/jenderalcode")
 	build.Dir = src
 	var buildOut bytes.Buffer
 	build.Stdout, build.Stderr = &buildOut, &buildOut
@@ -155,7 +155,7 @@ func runUpdate(source string, checkOnly, force bool) error {
 		return fmt.Errorf("gagal mengganti %s: %w", exe, err)
 	}
 	fmt.Printf("✔ binary diperbarui: %s → %s\n", shortOf(curCommit), shortOf(newCommit))
-	fmt.Printf("  backup binary lama: %s\n  verifikasi dengan: jenderal version\n", bak)
+	fmt.Printf("  backup binary lama: %s\n  verifikasi dengan: jenderalcode version\n", bak)
 	return nil
 }
 
@@ -174,7 +174,7 @@ func detectSourceDir(exe string) (string, error) {
 	}
 }
 
-// isJenderalSource true jika dir adalah repo source jenderal (ada .git dan
+// isJenderalSource true jika dir adalah repo source jenderalcode (ada .git dan
 // go.mod dengan module yang cocok).
 func isJenderalSource(dir string) bool {
 	if _, err := os.Stat(filepath.Join(dir, ".git")); err != nil {

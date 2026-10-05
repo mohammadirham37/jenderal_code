@@ -8,8 +8,8 @@ JenderalCode adalah agent coding yang dibangun dari PRD di file
 - `go build ./...` — kompilasi semua paket
 - `go test ./...` — jalankan unit test (core wajib lulus)
 - `go vet ./...` — linter statis
-- `go build -o jenderal ./cmd/jenderal` — build binary CLI/TUI
-- `JENDERAL_MOCK=1 ./jenderal` — demo TUI tanpa API key
+- `go build -o jenderalcode ./cmd/jenderalcode` — build binary CLI/TUI
+- `JENDERAL_MOCK=1 ./jenderalcode` — demo TUI tanpa API key
 
 ## Konvensi kode
 
@@ -22,7 +22,7 @@ JenderalCode adalah agent coding yang dibangun dari PRD di file
 - Setiap perilaku baru di agent loop wajib punya unit test di
   `internal/agent/agent_test.go` dengan provider mock.
 - Harga/katalog model di `catalog/models.json` bersifat best-effort dan bisa
-  diperbarui dengan `jenderal models --refresh`.
+  diperbarui dengan `jenderalcode models --refresh`.
 
 ## Aturan tim
 

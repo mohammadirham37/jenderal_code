@@ -166,7 +166,7 @@ func (r *Registry) Get(id string) (Provider, error) {
 	}
 	available := r.IDs()
 	if len(available) == 0 {
-		return nil, fmt.Errorf("provider %q tidak tersedia; tidak ada provider terkonfigurasi — jalankan `jenderal auth login <provider>` atau isi API key di jenderal.jsonc", id)
+		return nil, fmt.Errorf("provider %q tidak tersedia; tidak ada provider terkonfigurasi — jalankan `jenderalcode auth login <provider>` atau isi API key di jenderal.jsonc", id)
 	}
 	return nil, fmt.Errorf("provider %q tidak tersedia (kredensial belum diatur atau tidak dikenal); tersedia: %s", id, strings.Join(available, ", "))
 }

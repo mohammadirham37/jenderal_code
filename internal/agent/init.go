@@ -10,7 +10,7 @@ import (
 )
 
 // InitProject menganalisis repo dan menghasilkan isi JENDERAL.md awal
-// (dipakai `jenderal init` dan slash command /init).
+// (dipakai `jenderalcode init` dan slash command /init).
 func InitProject(projDir string) string {
 	var b strings.Builder
 	name := filepath.Base(projDir)

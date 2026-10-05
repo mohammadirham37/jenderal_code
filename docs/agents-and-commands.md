@@ -26,7 +26,7 @@ Laporkan temuan diurutkan dari yang paling berisiko.
 Pemakaian:
 
 - TUI: `/agent` → pilih dari daftar.
-- CLI: `jenderal run "review modul auth" --agent reviewer`.
+- CLI: `jenderalcode run "review modul auth" --agent reviewer`.
 - Sub-agen: agen utama memanggil tool `task` dengan `"agent": "reviewer"`.
   Sub-agen punya konteks terpisah, hasil akhirnya dikembalikan ke agen utama,
   dan sub-agen tidak boleh memanggil `task` lagi (tidak bersarang).

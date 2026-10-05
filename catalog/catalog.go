@@ -1,6 +1,6 @@
 // Package catalog menyimpan daftar provider dan model bawaan beserta
 // harganya. Katalog di-embed ke binary sehingga bekerja offline, dan bisa
-// diperbarui dengan `jenderal models --refresh` (tersimpan di cache OS).
+// diperbarui dengan `jenderalcode models --refresh` (tersimpan di cache OS).
 package catalog
 
 import (

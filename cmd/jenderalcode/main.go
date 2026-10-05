@@ -1,4 +1,4 @@
-// Command jenderal adalah entry point utama CLI + TUI + server.
+// Command jenderalcode adalah entry point utama CLI + TUI + server.
 package main
 
 import (

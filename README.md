@@ -34,19 +34,19 @@ endpoint OpenAI-compatible lain — semuanya lewat satu binary tanpa runtime Nod
   `~/.local/share/jenderalcode/jenderal.db`: lanjutkan, cari, ganti nama,
   hapus, fork via impor, ekspor Markdown/JSON, **undo/redo** file + pesan.
 - **Konteks proyek** — `JENDERAL.md` (atau `AGENTS.md`) dibaca otomatis;
-  `jenderal init` membuatnya dari analisis repo; referensi `@path/ke/file`.
+  `jenderalcode init` membuatnya dari analisis repo; referensi `@path/ke/file`.
 - **Custom agent & command** — `.jenderal/agents/*.md` (system prompt + model +
   daftar tool) dan `.jenderal/commands/*.md` (slash command kustom).
 - **MCP client** — server lokal (stdio) dan remote (HTTP); tool MCP otomatis
   jadi tool agen (`mcp__server__tool`).
-- **Server API lokal** — `jenderal serve` membuka HTTP + SSE di `127.0.0.1`
+- **Server API lokal** — `jenderalcode serve` membuka HTTP + SSE di `127.0.0.1`
   dengan token acak; SDK Go tersedia di `pkg/sdk`.
 
 ## Instalasi
 
 ```sh
 # dari sumber (butuh Go 1.23+)
-go install github.com/mohammadirham37/jenderal_code/cmd/jenderal@latest
+go install github.com/mohammadirham37/jenderal_code/cmd/jenderalcode@latest
 go install github.com/mohammadirham37/jenderal_code/cmd/jc@latest          # alias pendek
 ```
 
@@ -54,7 +54,7 @@ Atau build manual:
 
 ```sh
 git clone https://github.com/mohammadirham37/jenderal_code && cd jenderal_code
-go build -o jenderal ./cmd/jenderal
+go build -o jenderalcode ./cmd/jenderalcode
 ```
 
 ## Mulai cepat
@@ -62,12 +62,12 @@ go build -o jenderal ./cmd/jenderal
 ```sh
 cd proyek-anda
 
-jenderal                      # buka TUI interaktif
+jenderalcode                  # buka TUI interaktif
 ```
 
 1. **Isi kredensial** (pilih salah satu):
    ```sh
-   jenderal auth login zai     # atau openai, anthropic, openrouter, kilo, …
+   jenderalcode auth login zai     # atau openai, anthropic, openrouter, kilo, …
    export OPENAI_API_KEY=...   # variabel lingkungan juga dibaca
    ```
    Ollama/LM Studio lokal tidak butuh API key.
@@ -83,34 +83,34 @@ jenderal                      # buka TUI interaktif
    Bisa juga dipilih di dalam TUI dengan `Ctrl+M` atau `/model`.
 3. **Ajukan pertanyaan** di TUI, atau non-interaktif:
    ```sh
-   jenderal run "perbaiki test yang gagal di pkg/auth" --yolo   # di CI
-   jenderal run "review diff terakhir" --mode plan              # hanya baca
-   jenderal run "..." --json                                    # output JSONL
+   jenderalcode run "perbaiki test yang gagal di pkg/auth" --yolo   # di CI
+   jenderalcode run "review diff terakhir" --mode plan              # hanya baca
+   jenderalcode run "..." --json                                    # output JSONL
    ```
 
 ### Coba tanpa API key
 
 ```sh
-JENDERAL_MOCK=1 jenderal          # TUI dengan provider mock offline
-JENDERAL_MOCK=1 jenderal run "buatkan file demo" --yolo
+JENDERAL_MOCK=1 jenderalcode          # TUI dengan provider mock offline
+JENDERAL_MOCK=1 jenderalcodecode run "buatkan file demo" --yolo
 ```
 
 ## Perintah CLI
 
 | Perintah | Fungsi |
 | --- | --- |
-| `jenderal` | TUI interaktif di folder saat ini (`--continue`, `--session`) |
-| `jenderal run "<prompt>"` | Tugas non-interaktif; flag `--json --model --agent --yolo --mode plan` |
-| `jenderal serve --port 4096` | API HTTP+SSE lokal (127.0.0.1, token acak) |
-| `jenderal auth login\|logout\|list` | Kredensial provider (keychain OS, fallback file aman) |
-| `jenderal models [--refresh]` | Daftar model + harga; `--refresh` ambil terbaru |
-| `jenderal sessions list\|export\|import\|rm\|rename` | Kelola sesi |
-| `jenderal mcp add\|list\|rm` | Kelola server MCP |
-| `jenderal init` | Buat `JENDERAL.md` dari analisis repo |
-| `jenderal stats` | Ringkasan token & biaya per hari/model |
-| `jenderal upgrade` | Periksa versi terbaru |
-| `jenderal update [--check] [--force]` | Update binary jika commit remote berbeda; tarik source lalu build ulang |
-| `jenderal version` | Info versi |
+| `jenderalcode` | TUI interaktif di folder saat ini (`--continue`, `--session`) |
+| `jenderalcode run "<prompt>"` | Tugas non-interaktif; flag `--json --model --agent --yolo --mode plan` |
+| `jenderalcode serve --port 4096` | API HTTP+SSE lokal (127.0.0.1, token acak) |
+| `jenderalcode auth login\|logout\|list` | Kredensial provider (keychain OS, fallback file aman) |
+| `jenderalcode models [--refresh]` | Daftar model + harga; `--refresh` ambil terbaru |
+| `jenderalcode sessions list\|export\|import\|rm\|rename` | Kelola sesi |
+| `jenderalcode mcp add\|list\|rm` | Kelola server MCP |
+| `jenderalcode init` | Buat `JENDERAL.md` dari analisis repo |
+| `jenderalcode stats` | Ringkasan token & biaya per hari/model |
+| `jenderalcode upgrade` | Periksa versi terbaru |
+| `jenderalcode update [--check] [--force]` | Update binary jika commit remote berbeda; tarik source lalu build ulang |
+| `jenderalcode version` | Info versi |
 
 ## TUI
 
@@ -169,7 +169,7 @@ rincian setiap kunci ada di [docs/configuration.md](docs/configuration.md).
 ## Server API & SDK
 
 ```sh
-jenderal serve --port 4096
+jenderalcode serve --port 4096
 # endpoint: POST /session · GET /session · POST /session/{id}/message
 #           GET /session/{id}/events (SSE) · POST /session/{id}/permission/{id}
 #           POST /session/{id}/abort · GET /models · GET /health
@@ -199,7 +199,7 @@ Satu engine, semua antarmuka hanya pelanggan event bus. Rincian:
 ## Struktur repositori
 
 ```
-├── cmd/jenderal/        # entry CLI + TUI + serve
+├── cmd/jenderalcode/        # entry CLI + TUI + serve
 ├── cmd/jc/              # alias pendek
 ├── internal/
 │   ├── agent/           # loop, mode, kompaksi, sub-agen, custom agent
@@ -222,7 +222,7 @@ Satu engine, semua antarmuka hanya pelanggan event bus. Rincian:
 ```sh
 go test ./...      # unit test core
 go vet ./...
-go build -o jenderal ./cmd/jenderal
+go build -o jenderalcode ./cmd/jenderalcode
 ```
 
 ## Roadmap

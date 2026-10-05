@@ -102,7 +102,7 @@ type Provider interface {
 }
 
 // ErrNoKey dilempar saat provider butuh API key tetapi tidak ditemukan.
-var ErrNoKey = errors.New("api key tidak ditemukan (atur lewat `jenderal auth login`, variabel lingkungan, atau jenderal.jsonc)")
+var ErrNoKey = errors.New("api key tidak ditemukan (atur lewat `jenderalcode auth login`, variabel lingkungan, atau jenderal.jsonc)")
 
 // ModelRefError kesalahan referensi model "provider/model".
 type ModelRefError struct{ Ref string }

@@ -1,4 +1,4 @@
-// Package cli mengimplementasikan semua perintah `jenderal` (PRD 9.1).
+// Package cli mengimplementasikan semua perintah `jenderalcode` (PRD 9.1).
 package cli
 
 import (
@@ -63,15 +63,15 @@ func bootstrap(overrides map[string]any) (*app, error) {
 // NewRootCommand menyusun pohon perintah.
 func NewRootCommand() *cobra.Command {
 	root := &cobra.Command{
-		Use:   "jenderal",
+		Use:   "jenderalcode",
 		Short: "JenderalCode — satu komandan untuk semua model AI",
 		Long: `JenderalCode adalah AI coding agent open-source yang ringan dan bebas vendor.
 
 Jalankan tanpa argumen untuk membuka TUI interaktif di folder saat ini.
 Contoh:
-  jenderal                     # TUI interaktif
-  jenderal run "perbaiki bug"  # satu tugas non-interaktif
-  jenderal serve --port 4096   # API HTTP+SSE lokal`,
+  jenderalcode                 # TUI interaktif
+  jenderalcode run "perbaiki bug"  # satu tugas non-interaktif
+  jenderalcode serve --port 4096   # API HTTP+SSE lokal`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -99,7 +99,7 @@ Contoh:
 
 	root.AddCommand(&cobra.Command{
 		Use:   "version",
-		Short: "Tampilkan versi jenderal",
+		Short: "Tampilkan versi jenderalcode",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println(versionString())
 		},
@@ -119,7 +119,7 @@ func Execute() int {
 }
 
 func versionString() string {
-	return fmt.Sprintf("jenderal %s (commit %s, dibangun %s)", Version, Commit, Date)
+	return fmt.Sprintf("jenderalcode %s (commit %s, dibangun %s)", Version, Commit, Date)
 }
 
 var _ = filepath.Join

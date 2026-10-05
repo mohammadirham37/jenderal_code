@@ -1,5 +1,5 @@
 // Package sdk adalah klien Go untuk server lokal JenderalCode
-// (`jenderal serve`). Dipakai ekstensi editor, desktop, dan otomasi lain.
+// (`jenderalcode serve`). Dipakai ekstensi editor, desktop, dan otomasi lain.
 package sdk
 
 import (

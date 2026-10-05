@@ -1,0 +1,88 @@
+# Contoh jenderal.jsonc lengkap
+# Salin ke root proyek atau ~/.config/jenderalcode/jenderal.jsonc
+# Semua kunci opsional; urutan lapisan: bawaan -> global -> proyek -> env -> flag CLI.
+{
+  "$schema": "https://jenderalcode.dev/schema/config.json",
+
+  // Bahasa jawaban agen dan UI TUI: "id" atau "en"
+  "language": "id",
+
+  // Tema TUI: jenderal | dark | light | catppuccin | tokyonight
+  "theme": "jenderal",
+
+  // Model default untuk percakapan: provider/model
+  "model": "zai/glm-4.6",
+
+  // Model kecil/murah untuk judul sesi dan ringkasan kompaksi
+  "small_model": "openai/gpt-4o-mini",
+
+  // Mata uang tampilan biaya + kurs manual (1 USD)
+  "currency": "IDR",
+  "exchange_rate": 16500,
+
+  // Batas langkah agent loop per tugas
+  "step_limit": 50,
+
+  // Kompaksi otomatis saat token input mencapai persentase context window
+  "compact_percent": 85,
+
+  // Timeout default perintah bash (detik, maks 600)
+  "bash_timeout_sec": 120,
+
+  // Kredensial & endpoint provider. "type" default dari katalog;
+  // provider baru cukup "openai-compatible" + base_url.
+  "provider": {
+    "zai": {
+      "api_key": "{env:ZAI_API_KEY}",
+      // Untuk paket Coding Plan Z.ai: https://api.z.ai/api/coding/paas/v4
+      "base_url": "https://api.z.ai/api/paas/v4"
+    },
+    "kilo": {
+      "type": "openai-compatible",
+      "api_key": "{env:KILO_API_KEY}",
+      "base_url": "https://api.kilo.ai/api/gateway"
+    },
+    // Provider lokal tanpa API key
+    "lokal": {
+      "type": "openai-compatible",
+      "base_url": "http://localhost:11434/v1",
+      "models": {
+        "qwen2.5-coder:14b": { "context_window": 32768 }
+      }
+    }
+  },
+
+  // Sistem izin: per tool (string) atau per pola (map).
+  // Level: allow | ask | deny. '*' = sisanya.
+  "permission": {
+    "edit": "ask",
+    "write": "ask",
+    "bash": {
+      "git status": "allow",
+      "git diff": "allow",
+      "git log": "allow",
+      "go test *": "allow",
+      "go build *": "allow",
+      "npm test": "allow",
+      "rm -rf *": "deny",
+      "sudo *": "deny",
+      "*": "ask"
+    },
+    "webfetch": "ask"
+  },
+
+  // Server MCP. local = proses stdio; remote = HTTP.
+  "mcp": {
+    "db": { "type": "local", "command": ["npx", "-y", "@example/mcp-postgres"] },
+    "github": { "type": "remote", "url": "https://example.com/mcp" }
+  },
+
+  // Batas biaya dalam USD (0 = tanpa batas). Sesi berhenti saat tercapai.
+  "budget": {
+    "per_session_usd": 2.0,
+    "per_day_usd": 10.0
+  },
+
+  // Keybinding TUI (contoh):
+  // "keybinds": { "model_picker": "ctrl+m", "session_list": "ctrl+s" }
+}

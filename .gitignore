@@ -1,0 +1,17 @@
+# binary build lokal (root saja agar cmd/jenderal tidak ikut ter-ignore)
+/jenderal
+/jc
+dist/
+
+# data runtime lokal
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.*
+!.env.example
+
+# go
+*.test
+*.out
+coverage.txt

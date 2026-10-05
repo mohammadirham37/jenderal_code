@@ -14,15 +14,15 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
-	"github.com/jenderalcode/jenderal/catalog"
-	"github.com/jenderalcode/jenderal/internal/agent"
-	"github.com/jenderalcode/jenderal/internal/bus"
-	"github.com/jenderalcode/jenderal/internal/mcp"
-	"github.com/jenderalcode/jenderal/internal/permission"
-	"github.com/jenderalcode/jenderal/internal/provider"
-	"github.com/jenderalcode/jenderal/internal/server"
-	"github.com/jenderalcode/jenderal/internal/session"
-	"github.com/jenderalcode/jenderal/internal/tui"
+	"github.com/mohammadirham37/jenderal_code/catalog"
+	"github.com/mohammadirham37/jenderal_code/internal/agent"
+	"github.com/mohammadirham37/jenderal_code/internal/bus"
+	"github.com/mohammadirham37/jenderal_code/internal/mcp"
+	"github.com/mohammadirham37/jenderal_code/internal/permission"
+	"github.com/mohammadirham37/jenderal_code/internal/provider"
+	"github.com/mohammadirham37/jenderal_code/internal/server"
+	"github.com/mohammadirham37/jenderal_code/internal/session"
+	"github.com/mohammadirham37/jenderal_code/internal/tui"
 )
 
 // catalog_SetCacheDir mengaktifkan cache katalog hasil refresh.

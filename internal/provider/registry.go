@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jenderalcode/jenderal/catalog"
-	"github.com/jenderalcode/jenderal/internal/config"
+	"github.com/mohammadirham37/jenderal_code/catalog"
+	"github.com/mohammadirham37/jenderal_code/internal/config"
 )
 
 // Registry menyimpan semua provider yang siap dipakai (punya kredensial

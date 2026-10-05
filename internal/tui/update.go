@@ -9,9 +9,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/jenderalcode/jenderal/internal/agent"
-	"github.com/jenderalcode/jenderal/internal/bus"
-	"github.com/jenderalcode/jenderal/internal/permission"
+	"github.com/mohammadirham37/jenderal_code/internal/agent"
+	"github.com/mohammadirham37/jenderal_code/internal/bus"
+	"github.com/mohammadirham37/jenderal_code/internal/permission"
 )
 
 // programIface bagian tea.Program yang dipakai Model (menghindari impor siklus).

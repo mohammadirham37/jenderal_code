@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jenderalcode/jenderal/internal/bus"
-	"github.com/jenderalcode/jenderal/internal/session"
+	"github.com/mohammadirham37/jenderal_code/internal/bus"
+	"github.com/mohammadirham37/jenderal_code/internal/session"
 )
 
 // Client koneksi ke server JenderalCode.

@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jenderalcode/jenderal/catalog"
-	"github.com/jenderalcode/jenderal/internal/bus"
-	"github.com/jenderalcode/jenderal/internal/permission"
-	"github.com/jenderalcode/jenderal/internal/provider"
-	"github.com/jenderalcode/jenderal/internal/tool"
+	"github.com/mohammadirham37/jenderal_code/catalog"
+	"github.com/mohammadirham37/jenderal_code/internal/bus"
+	"github.com/mohammadirham37/jenderal_code/internal/permission"
+	"github.com/mohammadirham37/jenderal_code/internal/provider"
+	"github.com/mohammadirham37/jenderal_code/internal/tool"
 )
 
 // CustomAgent adalah agen khusus dari file .jenderal/agents/*.md dengan

@@ -505,5 +505,5 @@ Keberhasilan v1.0 diukur dari adopsi, kualitas agen, dan efisiensi resource, dal
 - [ ] Apakah TUI dan desktop berbagi proses lewat server lokal, atau desktop menanam core langsung?
 - [ ] Endpoint resmi Z.ai dan Kilo Gateway, serta apakah keduanya mendukung prompt caching, perlu diverifikasi.
 - [ ] Apakah perlu mode "hemat" yang otomatis memilih model termurah per jenis tugas (router model)?
-- [ ] Domain dan nama paket: `jenderalcode.dev`, `github.com/jenderalcode/jenderal`?
+- [ ] Domain dan nama paket: `jenderalcode.dev`, `github.com/mohammadirham37/jenderal_code`?
 - [ ] Model monetisasi jangka panjang (donasi, sponsor, versi tim berbayar)?

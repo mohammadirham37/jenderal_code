@@ -4,7 +4,7 @@ package main
 import (
 	"os"
 
-	"github.com/jenderalcode/jenderal/internal/cli"
+	"github.com/mohammadirham37/jenderal_code/internal/cli"
 )
 
 func main() {

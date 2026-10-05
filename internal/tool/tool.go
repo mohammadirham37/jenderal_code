@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jenderalcode/jenderal/internal/permission"
+	"github.com/mohammadirham37/jenderal_code/internal/permission"
 )
 
 // Alias tipe izin diekspor agar adapter lain (MCP) bisa memakainya.

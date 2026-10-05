@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jenderalcode/jenderal/catalog"
+	"github.com/mohammadirham37/jenderal_code/catalog"
 )
 
 // serverOpenAI tiruan endpoint chat/completions SSE.

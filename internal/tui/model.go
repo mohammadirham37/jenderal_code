@@ -13,12 +13,12 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 
-	"github.com/jenderalcode/jenderal/catalog"
-	"github.com/jenderalcode/jenderal/internal/agent"
-	"github.com/jenderalcode/jenderal/internal/bus"
-	"github.com/jenderalcode/jenderal/internal/config"
-	"github.com/jenderalcode/jenderal/internal/provider"
-	"github.com/jenderalcode/jenderal/internal/session"
+	"github.com/mohammadirham37/jenderal_code/catalog"
+	"github.com/mohammadirham37/jenderal_code/internal/agent"
+	"github.com/mohammadirham37/jenderal_code/internal/bus"
+	"github.com/mohammadirham37/jenderal_code/internal/config"
+	"github.com/mohammadirham37/jenderal_code/internal/provider"
+	"github.com/mohammadirham37/jenderal_code/internal/session"
 )
 
 // AppContext dependensi aplikasi yang dibagikan ke TUI.

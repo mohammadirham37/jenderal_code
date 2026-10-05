@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jenderalcode/jenderal/catalog"
-	"github.com/jenderalcode/jenderal/internal/bus"
-	"github.com/jenderalcode/jenderal/internal/provider"
-	"github.com/jenderalcode/jenderal/internal/session"
+	"github.com/mohammadirham37/jenderal_code/catalog"
+	"github.com/mohammadirham37/jenderal_code/internal/bus"
+	"github.com/mohammadirham37/jenderal_code/internal/provider"
+	"github.com/mohammadirham37/jenderal_code/internal/session"
 )
 
 // maybeCompact menjalankan kompaksi otomatis bila token input terakhir

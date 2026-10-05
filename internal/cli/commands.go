@@ -17,11 +17,11 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
-	"github.com/jenderalcode/jenderal/catalog"
-	"github.com/jenderalcode/jenderal/internal/agent"
-	"github.com/jenderalcode/jenderal/internal/config"
-	"github.com/jenderalcode/jenderal/internal/provider"
-	"github.com/jenderalcode/jenderal/internal/session"
+	"github.com/mohammadirham37/jenderal_code/catalog"
+	"github.com/mohammadirham37/jenderal_code/internal/agent"
+	"github.com/mohammadirham37/jenderal_code/internal/config"
+	"github.com/mohammadirham37/jenderal_code/internal/provider"
+	"github.com/mohammadirham37/jenderal_code/internal/session"
 )
 
 // cacheDirOf alias agar run.go tidak duplikat.
@@ -651,13 +651,13 @@ func upgradeCmd() *cobra.Command {
 		Short: "Periksa dan unduh versi terbaru",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := &http.Client{Timeout: 20 * time.Second}
-			req, _ := http.NewRequest("GET", "https://api.github.com/repos/jenderalcode/jenderal/releases/latest", nil)
+			req, _ := http.NewRequest("GET", "https://api.github.com/repos/mohammadirham37/jenderal_code/releases/latest", nil)
 			req.Header.Set("Accept", "application/vnd.github+json")
 			resp, err := client.Do(req)
 			if err != nil || resp.StatusCode != 200 {
 				fmt.Println("tidak bisa memeriksa pembaruan (repo rilis belum tersedia).")
 				fmt.Println("Perbarui manual:")
-				fmt.Println("  go install github.com/jenderalcode/jenderal/cmd/jenderal@latest")
+				fmt.Println("  go install github.com/mohammadirham37/jenderal_code/cmd/jenderal@latest")
 				if resp != nil {
 					resp.Body.Close()
 				}

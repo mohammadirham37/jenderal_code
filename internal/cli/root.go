@@ -8,9 +8,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jenderalcode/jenderal/internal/config"
-	"github.com/jenderalcode/jenderal/internal/provider"
-	"github.com/jenderalcode/jenderal/internal/session"
+	"github.com/mohammadirham37/jenderal_code/internal/config"
+	"github.com/mohammadirham37/jenderal_code/internal/provider"
+	"github.com/mohammadirham37/jenderal_code/internal/session"
 )
 
 // Versi diisi saat build (-ldflags).
@@ -95,7 +95,7 @@ Contoh:
 	root.Flags().StringP("session", "s", "", "lanjutkan sesi dengan ID tertentu")
 
 	root.AddCommand(runCmd(), serveCmd(), authCmd(), modelsCmd(),
-		sessionsCmd(), mcpCmd(), initCmd(), statsCmd(), upgradeCmd(), desktopCmd())
+		sessionsCmd(), mcpCmd(), initCmd(), statsCmd(), upgradeCmd(), updateCmd(), desktopCmd())
 
 	root.AddCommand(&cobra.Command{
 		Use:   "version",

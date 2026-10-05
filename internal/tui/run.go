@@ -5,10 +5,10 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/jenderalcode/jenderal/internal/agent"
-	"github.com/jenderalcode/jenderal/internal/bus"
-	"github.com/jenderalcode/jenderal/internal/mcp"
-	"github.com/jenderalcode/jenderal/internal/session"
+	"github.com/mohammadirham37/jenderal_code/internal/agent"
+	"github.com/mohammadirham37/jenderal_code/internal/bus"
+	"github.com/mohammadirham37/jenderal_code/internal/mcp"
+	"github.com/mohammadirham37/jenderal_code/internal/session"
 )
 
 // programRef jembatan global untuk event dari goroutine lain

@@ -46,14 +46,14 @@ endpoint OpenAI-compatible lain — semuanya lewat satu binary tanpa runtime Nod
 
 ```sh
 # dari sumber (butuh Go 1.23+)
-go install github.com/jenderalcode/jenderal/cmd/jenderal@latest
-go install github.com/jenderalcode/jenderal/cmd/jc@latest          # alias pendek
+go install github.com/mohammadirham37/jenderal_code/cmd/jenderal@latest
+go install github.com/mohammadirham37/jenderal_code/cmd/jc@latest          # alias pendek
 ```
 
 Atau build manual:
 
 ```sh
-git clone https://github.com/jenderalcode/jenderal && cd jenderal
+git clone https://github.com/mohammadirham37/jenderal_code && cd jenderal_code
 go build -o jenderal ./cmd/jenderal
 ```
 
@@ -109,6 +109,7 @@ JENDERAL_MOCK=1 jenderal run "buatkan file demo" --yolo
 | `jenderal init` | Buat `JENDERAL.md` dari analisis repo |
 | `jenderal stats` | Ringkasan token & biaya per hari/model |
 | `jenderal upgrade` | Periksa versi terbaru |
+| `jenderal update [--check] [--force]` | Update binary jika commit remote berbeda; tarik source lalu build ulang |
 | `jenderal version` | Info versi |
 
 ## TUI

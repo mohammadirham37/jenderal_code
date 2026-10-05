@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jenderalcode/jenderal/catalog"
+	"github.com/mohammadirham37/jenderal_code/catalog"
 )
 
 // AnthropicOptions opsi adapter Anthropic Messages.

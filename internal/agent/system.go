@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/jenderalcode/jenderal/internal/config"
+	"github.com/mohammadirham37/jenderal_code/internal/config"
 	"strings"
 	"time"
 )

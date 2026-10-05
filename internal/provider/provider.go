@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jenderalcode/jenderal/catalog"
+	"github.com/mohammadirham37/jenderal_code/catalog"
 )
 
 // Role peran pesan dalam percakapan.

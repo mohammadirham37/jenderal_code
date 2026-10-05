@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jenderalcode/jenderal/internal/tool"
+	"github.com/mohammadirham37/jenderal_code/internal/tool"
 )
 
 // send mengirim data ke server: stdin (stdio) atau POST (remote).

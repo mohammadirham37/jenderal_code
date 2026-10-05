@@ -65,7 +65,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jenderalcode/jenderal/pkg/sdk"
+	"github.com/mohammadirham37/jenderal_code/pkg/sdk"
 )
 
 func main() {

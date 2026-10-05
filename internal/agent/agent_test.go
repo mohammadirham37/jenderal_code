@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jenderalcode/jenderal/internal/config"
-	"github.com/jenderalcode/jenderal/internal/permission"
-	"github.com/jenderalcode/jenderal/internal/provider"
-	"github.com/jenderalcode/jenderal/internal/session"
+	"github.com/mohammadirham37/jenderal_code/internal/config"
+	"github.com/mohammadirham37/jenderal_code/internal/permission"
+	"github.com/mohammadirham37/jenderal_code/internal/provider"
+	"github.com/mohammadirham37/jenderal_code/internal/session"
 )
 
 // setup membangun lingkungan agent test lengkap di direktori sementara.

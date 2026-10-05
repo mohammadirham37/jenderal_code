@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/jenderalcode/jenderal/internal/permission"
+	"github.com/mohammadirham37/jenderal_code/internal/permission"
 )
 
 type perm = permission.Level

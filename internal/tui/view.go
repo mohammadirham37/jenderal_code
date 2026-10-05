@@ -34,6 +34,10 @@ func (m *Model) View() string {
 	switch m.view {
 	case viewPerm:
 		return m.viewPermDialog()
+	case viewProvider:
+		return m.viewProviderDialog()
+	case viewProviderKey:
+		return m.viewProviderKeyDialog()
 	case viewModel:
 		return m.viewList(m.lang.get("model_title"), m.modelLines(), m.modelIdx)
 	case viewSessions:
@@ -266,6 +270,91 @@ func (m *Model) viewPermDialog() string {
 		}
 	}
 	b.WriteString("\n" + m.th.MutedStyle().Render("↑↓ / 1-3 · Enter OK · Esc tolak"))
+	return boxDialog(b.String(), m, m.width-8)
+}
+
+// provBadge badge status koneksi satu provider.
+func (m *Model) provBadge(it provItem) string {
+	switch it.status {
+	case "ready":
+		label := m.lang.get("provider_ready")
+		if it.viaEnv {
+			label = m.lang.get("provider_env")
+		}
+		return lipgloss.NewStyle().Foreground(m.th.Success).Render("✔ " + label)
+	case "lokal":
+		return m.th.MutedStyle().Render("◦ " + m.lang.get("provider_lokal"))
+	default:
+		return lipgloss.NewStyle().Foreground(m.th.Error).Render("✗ " + m.lang.get("provider_need_key"))
+	}
+}
+
+// truncRune memotong string aman-rune dengan elipsis.
+func truncRune(s string, n int) string {
+	r := []rune(s)
+	if len(r) <= n {
+		return s
+	}
+	return string(r[:n-1]) + "…"
+}
+
+// viewProviderDialog daftar semua provider di katalog dengan badge status.
+func (m *Model) viewProviderDialog() string {
+	var b strings.Builder
+	b.WriteString(lipgloss.NewStyle().Foreground(m.th.Primary).Bold(true).
+		Render("⬢ "+m.lang.get("provider_title")) + "\n\n")
+	start, end := 0, len(m.provItems)
+	if len(m.provItems) > 12 {
+		start = max(0, m.provIdx-6)
+		end = min(len(m.provItems), start+12)
+	}
+	for i := start; i < end; i++ {
+		it := m.provItems[i]
+		cursor, dotStyle := "  ", m.th.MutedStyle()
+		if i == m.provIdx {
+			cursor = "▸ "
+		}
+		if it.active {
+			dotStyle = lipgloss.NewStyle().Foreground(m.th.Primary).Bold(true)
+		}
+		name := lipgloss.NewStyle().Bold(true).Render(fmt.Sprintf("%-16s", truncRune(it.name, 16)))
+		id := m.th.MutedStyle().Render(fmt.Sprintf("%-10s", truncRune(it.id, 10)))
+		cnt := m.th.MutedStyle().Render(fmt.Sprintf("%-8s", fmt.Sprintf("%d model", it.modelCount)))
+		line := cursor + dotStyle.Render("●") + " " + name + " " + id + " " + cnt
+		// Badge mulai di kolom tetap agar sejajar di semua baris.
+		badge := m.provBadge(it)
+		if pad := 41 - lipgloss.Width(line); pad > 0 {
+			line += strings.Repeat(" ", pad)
+		}
+		line += badge
+		if it.active {
+			line += "  " + lipgloss.NewStyle().Foreground(m.th.Primary).Render(m.lang.get("provider_active"))
+		}
+		b.WriteString(line + "\n")
+	}
+	if len(m.provItems) == 0 {
+		b.WriteString(m.th.MutedStyle().Render("(kosong)") + "\n")
+	}
+	b.WriteString("\n" + m.th.MutedStyle().Render(m.lang.get("provider_footer")))
+	return boxDialog(b.String(), m, m.width-8)
+}
+
+// viewProviderKeyDialog input API key untuk provider yang belum konek.
+func (m *Model) viewProviderKeyDialog() string {
+	name, id := m.provKeyFor, m.provKeyFor
+	for _, it := range m.provItems {
+		if it.id == m.provKeyFor {
+			name = it.name
+			break
+		}
+	}
+	var b strings.Builder
+	title := lipgloss.NewStyle().Foreground(m.th.Primary).Bold(true).
+		Render("⬢ "+m.lang.get("provider_key_title")+" "+name)
+	b.WriteString(title + m.th.MutedStyle().Render("  ·  "+id) + "\n\n")
+	b.WriteString(m.th.MutedStyle().Render(m.lang.get("provider_key_hint")) + "\n\n")
+	b.WriteString(m.provKeyInput.View() + "\n")
+	b.WriteString("\n" + m.th.MutedStyle().Render("Enter "+m.lang.get("provider_key_footer")))
 	return boxDialog(b.String(), m, m.width-8)
 }
 

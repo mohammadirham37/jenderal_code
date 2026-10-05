@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/textarea"
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 
 	"github.com/mohammadirham37/jenderal_code/catalog"
@@ -26,6 +27,7 @@ type AppContext struct {
 	Cfg     *config.Config
 	Reg     *provider.Registry
 	Store   *session.Store
+	Keys    *provider.KeyStore
 	Version string
 }
 
@@ -43,6 +45,8 @@ const (
 	viewChat viewState = iota
 	viewPerm
 	viewModel
+	viewProvider
+	viewProviderKey
 	viewSessions
 	viewAgents
 	viewPalette
@@ -54,6 +58,16 @@ type modelItem struct {
 	ref   string // provider/model
 	label string
 	info  catalog.ModelInfo
+}
+
+// provItem satu baris daftar provider di dialog /provider.
+type provItem struct {
+	id, name   string
+	status     string // ready | missing | lokal
+	hasKey     bool
+	viaEnv     bool
+	modelCount int
+	active     bool
 }
 
 type paletteItem struct {
@@ -86,6 +100,11 @@ type Model struct {
 
 	modelItems      []modelItem
 	modelIdx        int
+	modelFilter     string // batasi daftar model ke satu provider
+	provItems       []provItem
+	provIdx         int
+	provKeyInput    textinput.Model
+	provKeyFor      string // provider yang sedang diisi API key-nya
 	sessions        []session.Session
 	sessIdx         int
 	agentsAll       []*agent.CustomAgent
@@ -120,15 +139,22 @@ func NewModel(app *AppContext, ag *agent.Agent) Model {
 	in.KeyMap.LineNext.SetKeys("down", "ctrl+n")
 	in.KeyMap.LinePrevious.SetKeys("up", "ctrl+p")
 
+	keyIn := textinput.New()
+	keyIn.Placeholder = "tempel API key di sini…"
+	keyIn.EchoMode = textinput.EchoPassword
+	keyIn.EchoCharacter = '•'
+	keyIn.CharLimit = 500
+
 	m := Model{
-		app:      app,
-		ag:       ag,
-		th:       LoadTheme(app.Cfg.Theme()),
-		lang:     lang,
-		input:    in,
-		viewport: viewport.New(80, 20),
-		width:    80, // default; diperbarui oleh WindowSizeMsg
-		height:   24,
+		app:          app,
+		ag:           ag,
+		th:           LoadTheme(app.Cfg.Theme()),
+		lang:         lang,
+		input:        in,
+		provKeyInput: keyIn,
+		viewport:     viewport.New(80, 20),
+		width:        80, // default; diperbarui oleh WindowSizeMsg
+		height:       24,
 	}
 	m.layout()
 	m.buildPalette()
@@ -151,6 +177,7 @@ func gitBranch(dir string) string {
 func (m *Model) buildPalette() {
 	m.palette = []paletteItem{
 		{"/model", "pilih model"},
+		{"/provider", "konek ke provider AI"},
 		{"/agent", "pilih custom agent"},
 		{"/new", "sesi baru"},
 		{"/sessions", "daftar sesi"},
@@ -197,6 +224,51 @@ func (m *Model) loadHistory() {
 	m.tokensIn, m.tokensOut, m.costUSD = u.TokensIn, u.TokensOut, u.CostUSD
 }
 
+// buildProviderList menyusun daftar semua provider di katalog beserta
+// status koneksinya (key tersimpan, via env, lokal, atau belum ada key).
+func (m *Model) buildProviderList() {
+	providers, err := catalog.Providers()
+	if err != nil {
+		m.provItems = nil
+		return
+	}
+	m.provItems = make([]provItem, 0, len(providers))
+	for _, p := range providers {
+		it := provItem{id: p.ID, name: p.Name, modelCount: len(p.Models)}
+		if env := os.Getenv(p.EnvKey); env != "" {
+			it.status, it.viaEnv = "ready", true
+		} else if _, ok := m.app.Keys.Get(p.ID); ok {
+			it.status, it.hasKey = "ready", true
+		} else if !p.RequiresKey {
+			it.status = "lokal"
+		} else {
+			it.status = "missing"
+		}
+		it.active = strings.HasPrefix(m.ag.Model, p.ID+"/")
+		m.provItems = append(m.provItems, it)
+	}
+	// Provider aktif di depan agar langsung terlihat.
+	for i, it := range m.provItems {
+		if it.active && i > 0 {
+			m.provItems[0], m.provItems[i] = m.provItems[i], m.provItems[0]
+			break
+		}
+	}
+	m.provIdx = 0
+}
+
+// rebuildRegistry membentuk ulang registry provider (setelah key disimpan
+// atau dihapus) dan memasangnya ke agent tanpa kehilangan sesi.
+func (m *Model) rebuildRegistry() {
+	reg, err := provider.NewRegistry(m.app.Cfg, m.app.Keys)
+	if err != nil {
+		m.statusMsg = err.Error()
+		return
+	}
+	m.app.Reg = reg
+	m.ag.Reg = reg
+}
+
 func firstLine(s string) string {
 	if i := strings.IndexByte(s, '\n'); i >= 0 {
 		return s[:i]
@@ -205,9 +277,13 @@ func firstLine(s string) string {
 }
 
 // buildModelList menyusun daftar model dari semua provider siap pakai.
+// Bila modelFilter diisi, hanya provider itu yang ditampilkan.
 func (m *Model) buildModelList() {
 	m.modelItems = nil
 	for _, provID := range m.app.Reg.IDs() {
+		if m.modelFilter != "" && provID != m.modelFilter {
+			continue
+		}
 		p, err := m.app.Reg.Get(provID)
 		if err != nil {
 			continue
@@ -276,6 +352,9 @@ func (m *Model) handleSlash(input string) bool {
 	case "model":
 		m.buildModelList()
 		m.view = viewModel
+	case "provider":
+		m.buildProviderList()
+		m.view = viewProvider
 	case "agent":
 		m.loadAgents()
 		m.agentIdx = 0

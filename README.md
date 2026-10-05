@@ -107,6 +107,7 @@ JENDERAL_MOCK=1 jenderalcodecode run "buatkan file demo" --yolo
 | `jenderalcode sessions list\|export\|import\|rm\|rename` | Kelola sesi |
 | `jenderalcode mcp add\|list\|rm` | Kelola server MCP |
 | `jenderalcode init` | Buat `JENDERAL.md` dari analisis repo |
+| `/provider` (di TUI) | Konek ke provider AI: daftar provider + status, isi API key, pilih model |
 | `jenderalcode stats` | Ringkasan token & biaya per hari/model |
 | `jenderalcode upgrade` | Periksa versi terbaru |
 | `jenderalcode update [--check] [--force]` | Update binary jika commit remote berbeda; tarik source lalu build ulang |

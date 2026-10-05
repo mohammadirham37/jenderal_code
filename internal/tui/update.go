@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/mohammadirham37/jenderal_code/internal/agent"
@@ -259,11 +260,104 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 					m.statusMsg = err.Error()
 				}
 			}
+			m.modelFilter = ""
 			m.view = viewChat
+		case "esc", "q":
+			// Dibuka dari /provider → kembali ke daftar provider.
+			if m.modelFilter != "" {
+				m.modelFilter = ""
+				m.view = viewProvider
+			} else {
+				m.view = viewChat
+			}
+		}
+		return m, nil
+
+	case viewProvider:
+		switch key {
+		case "up", "k":
+			if m.provIdx > 0 {
+				m.provIdx--
+			}
+		case "down", "j":
+			if m.provIdx < len(m.provItems)-1 {
+				m.provIdx++
+			}
+		case "enter":
+			if m.provIdx >= len(m.provItems) {
+				return m, nil
+			}
+			it := m.provItems[m.provIdx]
+			if it.status == "missing" {
+				// Belum konek → minta API key.
+				m.provKeyFor = it.id
+				m.provKeyInput.Reset()
+				m.provKeyInput.Focus()
+				m.view = viewProviderKey
+				return m, textinput.Blink
+			}
+			// Sudah konek/lokal → langsung pilih model dari provider ini.
+			m.modelFilter = it.id
+			m.buildModelList()
+			m.modelIdx = 0
+			if len(m.modelItems) == 0 {
+				m.statusMsg = m.lang.get("provider_no_models") + " " + it.id
+				m.modelFilter = ""
+				return m, nil
+			}
+			m.view = viewModel
+		case "d":
+			if m.provIdx < len(m.provItems) && m.provItems[m.provIdx].hasKey {
+				id := m.provItems[m.provIdx].id
+				if err := m.app.Keys.Delete(id); err == nil {
+					m.rebuildRegistry()
+					m.buildProviderList()
+					m.statusMsg = m.lang.get("provider_deleted") + " " + id
+				}
+			}
 		case "esc", "q":
 			m.view = viewChat
 		}
 		return m, nil
+
+	case viewProviderKey:
+		switch key {
+		case "esc":
+			m.provKeyInput.Reset()
+			m.provKeyInput.Blur()
+			m.view = viewProvider
+			return m, nil
+		case "enter":
+			provID := m.provKeyFor
+			keyVal := strings.TrimSpace(m.provKeyInput.Value())
+			if keyVal == "" {
+				m.statusMsg = m.lang.get("provider_key_empty")
+				return m, nil
+			}
+			if err := m.app.Keys.Set(provID, keyVal); err != nil {
+				m.statusMsg = err.Error()
+				return m, nil
+			}
+			m.provKeyInput.Reset()
+			m.provKeyInput.Blur()
+			m.rebuildRegistry()
+			m.buildProviderList()
+			m.statusMsg = m.lang.get("provider_saved") + " " + provID
+			// Langsung tawarkan pilihan model dari provider yang baru konek.
+			m.modelFilter = provID
+			m.buildModelList()
+			m.modelIdx = 0
+			if len(m.modelItems) > 0 {
+				m.view = viewModel
+			} else {
+				m.modelFilter = ""
+				m.view = viewProvider
+			}
+			return m, nil
+		}
+		var cmd tea.Cmd
+		m.provKeyInput, cmd = m.provKeyInput.Update(msg)
+		return m, cmd
 
 	case viewSessions:
 		switch key {

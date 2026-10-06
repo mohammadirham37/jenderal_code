@@ -96,6 +96,9 @@ type Model struct {
 	streaming bool
 	streamBuf strings.Builder
 
+	thinkOpen  bool // blok thinking sedang mengalir
+	thinkStart time.Time
+
 	permCh      chan agent.PermResponse
 	pendingPerm *agent.PermRequest
 	permIdx     int

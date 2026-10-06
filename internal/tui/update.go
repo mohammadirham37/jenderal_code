@@ -2,6 +2,7 @@ package tui
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -119,16 +120,26 @@ func (m *Model) handleEvent(ev bus.Event) (tea.Model, tea.Cmd) {
 			m.streaming = true
 		}
 		if m.streamBuf.Len() == 0 {
-			// Blok asisten baru: bersihkan status sementara.
+			// Blok asisten baru: bersihkan status sementara dan tutup blok thinking.
 			m.statusMsg = ""
+			m.closeThinking()
 		}
 		m.streamBuf.WriteString(ev.Text)
 		m.upsertAssistantBlock()
 		m.refreshViewport()
 	case bus.EventReasoningDelta:
-		// ditampilkan sebagai status ringan
-		m.statusMsg = "…berpikir"
+		// Tampilkan isi reasoning sebagai blok tersendiri (muted).
+		m.statusMsg = m.lang.get("thinking")
+		if n := len(m.blocks); n > 0 && m.blocks[n-1].kind == "thinking" && m.blocks[n-1].streaming {
+			m.blocks[n-1].text += ev.Text
+		} else {
+			m.thinkOpen = true
+			m.thinkStart = time.Now()
+			m.blocks = append(m.blocks, chatBlock{kind: "thinking", text: ev.Text, streaming: true})
+		}
+		m.refreshViewport()
 	case bus.EventToolCall:
+		m.closeThinking()
 		m.flushStream()
 		m.blocks = append(m.blocks, chatBlock{kind: "tool", text: "⚙ " + ev.ToolName + " " + summarizeArgs(ev.Args)})
 		m.refreshViewport()
@@ -162,11 +173,13 @@ func (m *Model) handleEvent(ev bus.Event) (tea.Model, tea.Cmd) {
 	case bus.EventModelChanged:
 		m.statusMsg = "model: " + ev.Text
 	case bus.EventError:
+		m.closeThinking()
 		m.flushStream()
 		m.blocks = append(m.blocks, chatBlock{kind: "error", text: ev.Text})
 		m.streaming = false
 		m.refreshViewport()
 	case bus.EventDone:
+		m.closeThinking()
 		m.flushStream()
 		m.streaming = false
 		m.statusMsg = ""
@@ -184,6 +197,26 @@ func (m *Model) upsertAssistantBlock() {
 		return
 	}
 	m.blocks = append(m.blocks, chatBlock{kind: "assistant", text: m.streamBuf.String(), streaming: true})
+}
+
+// closeThinking menutup blok reasoning yang sedang mengalir, menggantinya
+// dengan ringkasan satu baris (jumlah kata + durasi).
+func (m *Model) closeThinking() {
+	if !m.thinkOpen {
+		return
+	}
+	m.thinkOpen = false
+	for i := len(m.blocks) - 1; i >= 0; i-- {
+		b := &m.blocks[i]
+		if b.kind == "thinking" && b.streaming {
+			b.streaming = false
+			secs := int(time.Since(m.thinkStart).Seconds())
+			b.text = fmt.Sprintf("%s · %d kata · %ds",
+				m.lang.get("thinking_done"), len(strings.Fields(b.text)), secs)
+			break
+		}
+	}
+	m.refreshViewport()
 }
 
 // flushStream menutup blok streaming aktif.

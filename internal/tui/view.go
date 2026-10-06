@@ -161,6 +161,14 @@ func (m *Model) renderBlocks() string {
 				renderMarkdown(b.text, m.th, w), "")
 		case "tool":
 			out = append(out, lipgloss.NewStyle().Foreground(m.th.Accent).Render(b.text))
+		case "thinking":
+			if b.streaming {
+				// Isi reasoning penuh, muted italic, mengalir live.
+				out = append(out, m.th.MutedStyle().Italic(true).
+					Render("✻ "+m.lang.get("thinking")+"\n"+b.text))
+			} else {
+				out = append(out, m.th.MutedStyle().Render("✻ "+b.text), "")
+			}
 		case "status":
 			out = append(out, m.th.MutedStyle().Render("· "+b.text))
 		case "error":

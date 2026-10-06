@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/mohammadirham37/jenderal_code/internal/config"
 )
 
 func TestSameCommit(t *testing.T) {
@@ -72,5 +74,51 @@ func TestIsJenderalSourceModuleMismatch(t *testing.T) {
 	}
 	if isJenderalSource(dir) {
 		t.Error("go.mod module berbeda harusnya tidak dikenali sebagai source jenderalcode")
+	}
+}
+
+// TestSourceHint menyimpan lalu membaca ulang lokasi repo; path tidak valid
+// harus diabaikan.
+func TestSourceHint(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("JENDERAL_DATA_DIR", filepath.Join(dir, "data"))
+	if err := config.EnsureDirs(); err != nil {
+		t.Fatal(err)
+	}
+	if got := loadSourceHint(); got != "" {
+		t.Errorf("hint awal harus kosong, dapat %q", got)
+	}
+	repo := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(repo, ".git"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(repo, "go.mod"), []byte("module "+modulePath+"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	saveSourceHint(repo)
+	if got := loadSourceHint(); got != repo {
+		t.Errorf("hint = %q, want %q", got, repo)
+	}
+	// Repo sudah tidak valid → hint diabaikan.
+	os.RemoveAll(filepath.Join(repo, ".git"))
+	if got := loadSourceHint(); got != "" {
+		t.Errorf("hint harus dibuang bila repo tidak valid, dapat %q", got)
+	}
+}
+
+// TestCommitFromVersion membedah pseudo-version go install dan tag polos.
+func TestCommitFromVersion(t *testing.T) {
+	cases := map[string]string{
+		"v0.0.0-20261006120000-abc123def456":   "abc123def456",
+		"v1.2.3-0.20261006120000-0123456789ab": "0123456789ab",
+		"(devel)":                              "",
+		"":                                     "",
+		"v0.1.0":                               "v0.1.0",
+		"v0.0.0-20261006120000-abc123def456-extra": "",
+	}
+	for v, want := range cases {
+		if got := commitFromVersion(v); got != want {
+			t.Errorf("commitFromVersion(%q) = %q, want %q", v, got, want)
+		}
 	}
 }

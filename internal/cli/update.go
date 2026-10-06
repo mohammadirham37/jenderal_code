@@ -7,10 +7,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
+
+	"github.com/mohammadirham37/jenderal_code/internal/config"
 )
 
 // modulePath dipakai untuk mengenali root repo source dan ldflags.
@@ -56,8 +59,14 @@ func runUpdate(source string, checkOnly, force bool) error {
 
 	src := source
 	if src == "" {
-		if src, err = detectSourceDir(exe); err != nil {
-			return err
+		// 1) Deteksi dari lokasi binary (binary di dalam repo).
+		src, err = detectSourceDir(exe)
+		if err != nil {
+			// 2) Lokasi yang diingat dari update sebelumnya.
+			src = loadSourceHint()
+			if src == "" {
+				return fmt.Errorf("source repo tidak ditemukan dari lokasi binary %s; jalankan sekali dengan --source <direktori-repo> (lokasi akan diingat), atau bangun binary dari repo", exe)
+			}
 		}
 	} else {
 		if src, err = filepath.Abs(src); err != nil {
@@ -67,9 +76,15 @@ func runUpdate(source string, checkOnly, force bool) error {
 			return fmt.Errorf("%s bukan source repo %s (butuh .git dan go.mod yang cocok)", src, modulePath)
 		}
 	}
+	// Ingat lokasi repo agar update berikutnya tidak butuh --source.
+	saveSourceHint(src)
 
-	// Commit binary saat ini; kalau binary dibangun tanpa ldflags, pakai HEAD source.
+	// Commit binary saat ini: ldflags → build info (vcs.revision / versi
+	// pseudo go install) → HEAD source.
 	curCommit := Commit
+	if curCommit == "" || curCommit == "dev" {
+		curCommit = binaryCommit()
+	}
 	if curCommit == "" || curCommit == "dev" {
 		if h, err := gitOut(src, "rev-parse", "HEAD"); err == nil {
 			curCommit = h
@@ -172,6 +187,83 @@ func detectSourceDir(exe string) (string, error) {
 		}
 		dir = parent
 	}
+}
+
+// sourceHintPath file yang menyimpan lokasi repo dari update sebelumnya,
+// sehingga `jenderalcode update` bekerja dari direktori mana pun.
+func sourceHintPath() string {
+	return filepath.Join(config.DataDir(), "source-path")
+}
+
+// loadSourceHint membaca lokasi repo tersimpan; kosong bila tidak valid.
+func loadSourceHint() string {
+	b, err := os.ReadFile(sourceHintPath())
+	if err != nil {
+		return ""
+	}
+	dir := strings.TrimSpace(string(b))
+	if !isJenderalSource(dir) {
+		return ""
+	}
+	return dir
+}
+
+// saveSourceHint menyimpan lokasi repo (best-effort).
+func saveSourceHint(dir string) {
+	if !isJenderalSource(dir) {
+		return
+	}
+	_ = config.EnsureDirs()
+	_ = os.WriteFile(sourceHintPath(), []byte(dir), 0o644)
+}
+
+// binaryCommit membaca commit binary yang sedang berjalan dari build info:
+// vcs.revision untuk build dari checkout git, atau hash di ujung
+// pseudo-version untuk `go install ...@latest`.
+func binaryCommit() string {
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		return ""
+	}
+	for _, s := range bi.Settings {
+		if s.Key == "vcs.revision" && s.Value != "" {
+			return s.Value
+		}
+	}
+	return commitFromVersion(bi.Main.Version)
+}
+
+// commitFromVersion mengekstrak commit hash (atau tag polos) dari nomor
+// versi modul, mis. "v0.0.0-20261006120000-abc123def456" → "abc123def456".
+func commitFromVersion(v string) string {
+	if v == "" || v == "(devel)" {
+		return ""
+	}
+	if i := strings.LastIndexByte(v, '-'); i >= 0 {
+		h := v[i+1:]
+		if isHexHash(h) {
+			return h
+		}
+	}
+	// Tag polos tanpa metadata (v0.1.0): dipakai sebagai identitas agar
+	// perbandingan tetap jalan (tag ≠ HEAD → update tersedia).
+	if strings.HasPrefix(v, "v") && !strings.Contains(v, "-") {
+		return v
+	}
+	return ""
+}
+
+// isHexHash true bila s panjang 7–40 dan semuanya hex.
+func isHexHash(s string) bool {
+	if len(s) < 7 || len(s) > 40 {
+		return false
+	}
+	for _, c := range s {
+		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
+			return false
+		}
+	}
+	return true
 }
 
 // isJenderalSource true jika dir adalah repo source jenderalcode (ada .git dan

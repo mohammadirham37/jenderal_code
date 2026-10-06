@@ -52,7 +52,15 @@ endpoint OpenAI-compatible lain — semuanya lewat satu binary tanpa runtime Nod
 ## Instalasi
 
 ```sh
-# dari sumber (butuh Go 1.23+)
+curl -fsSL https://raw.githubusercontent.com/mohammadirham37/jenderal_code/main/install.sh | sh
+```
+
+Installer mengunduh binary rilis terbaru untuk macOS/Linux (arm64 & amd64),
+memverifikasi checksum, dan memasang ke `~/.local/bin` beserta alias `jc`.
+
+Alternatif dari sumber (butuh Go 1.23+):
+
+```sh
 go install github.com/mohammadirham37/jenderal_code/cmd/jenderalcode@latest
 go install github.com/mohammadirham37/jenderal_code/cmd/jc@latest          # alias pendek
 ```

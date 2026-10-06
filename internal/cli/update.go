@@ -1,12 +1,19 @@
 package cli
 
 import (
+	"archive/tar"
 	"bytes"
+	"compress/gzip"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -16,8 +23,12 @@ import (
 	"github.com/mohammadirham37/jenderal_code/internal/config"
 )
 
-// modulePath dipakai untuk mengenali root repo source dan ldflags.
-const modulePath = "github.com/mohammadirham37/jenderal_code"
+const (
+	// modulePath dipakai untuk mengenali root repo source dan ldflags.
+	modulePath = "github.com/mohammadirham37/jenderal_code"
+	// ghRepo repo GitHub untuk jalur pembaruan rilis.
+	ghRepo = "mohammadirham37/jenderal_code"
+)
 
 // ---- update ----
 
@@ -64,9 +75,15 @@ func runUpdate(source string, checkOnly, force bool) error {
 		if err != nil {
 			// 2) Lokasi yang diingat dari update sebelumnya.
 			src = loadSourceHint()
-			if src == "" {
-				return fmt.Errorf("source repo tidak ditemukan dari lokasi binary %s; jalankan sekali dengan --source <direktori-repo> (lokasi akan diingat), atau bangun binary dari repo", exe)
-			}
+		}
+		if src == "" {
+			// 3) Lokasi baku yang umum untuk clone repo.
+			src = findKnownSourceDir()
+		}
+		if src == "" {
+			// 4) Tanpa source repo (binary installer/go install):
+			//    perbarui langsung dari GitHub Releases.
+			return releaseUpdate(exe, checkOnly, force)
 		}
 	} else {
 		if src, err = filepath.Abs(src); err != nil {
@@ -193,6 +210,39 @@ func detectSourceDir(exe string) (string, error) {
 // sehingga `jenderalcode update` bekerja dari direktori mana pun.
 func sourceHintPath() string {
 	return filepath.Join(config.DataDir(), "source-path")
+}
+
+// knownSourceDirs lokasi baku tempat repo biasa di-clone.
+func knownSourceDirs() []string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return nil
+	}
+	rel := []string{
+		"jenderal_code",
+		"Documents/jenderal_code",
+		"Documents/go_project/jenderal_code",
+		"Projects/jenderal_code",
+		"projects/jenderal_code",
+		"dev/jenderal_code",
+		"code/jenderal_code",
+		filepath.Join("go", "src", "github.com", "mohammadirham37", "jenderal_code"),
+	}
+	out := make([]string, 0, len(rel))
+	for _, r := range rel {
+		out = append(out, filepath.Join(home, r))
+	}
+	return out
+}
+
+// findKnownSourceDir mencari repo di lokasi baku; kosong bila tak ketemu.
+func findKnownSourceDir() string {
+	for _, dir := range knownSourceDirs() {
+		if isJenderalSource(dir) {
+			return dir
+		}
+	}
+	return ""
 }
 
 // loadSourceHint membaca lokasi repo tersimpan; kosong bila tidak valid.
@@ -328,4 +378,171 @@ func copyFile(src, dst string) error {
 		return err
 	}
 	return out.Close()
+}
+
+// ---- jalur rilis GitHub (binary tanpa source repo) ----
+
+// releaseUpdate memperbarui binary langsung dari GitHub Releases: unduh
+// tarball sesuai OS/arsitektur, verifikasi SHA256, lalu mengganti binary
+// (dan alias jc di folder yang sama) secara atomik.
+func releaseUpdate(exe string, checkOnly, force bool) error {
+	fmt.Println("source repo tidak ditemukan — memakai jalur rilis GitHub.")
+	client := &http.Client{Timeout: 30 * time.Second}
+	downloader := &http.Client{Timeout: 15 * time.Minute}
+
+	tag, err := latestReleaseTag(client)
+	if err != nil {
+		return err
+	}
+	ver := strings.TrimPrefix(tag, "v")
+	fmt.Printf("versi terpasang : %s\n", versionString())
+	fmt.Printf("rilis terbaru   : %s\n", tag)
+
+	if !force && ver == Version {
+		fmt.Println("✔ binary sudah dari rilis terbaru")
+		return nil
+	}
+	if checkOnly {
+		fmt.Println("pembaruan tersedia; jalankan `jenderalcode update` untuk memasang.")
+		return nil
+	}
+
+	name := fmt.Sprintf("jenderalcode_%s_%s_%s.tar.gz", ver, runtime.GOOS, runtime.GOARCH)
+	base := fmt.Sprintf("https://github.com/%s/releases/download/%s", ghRepo, tag)
+	tmp, err := os.MkdirTemp("", "jenderalcode-update-")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmp)
+
+	fmt.Printf("mengunduh %s ...\n", name)
+	if err := downloadFile(downloader, base+"/"+name, filepath.Join(tmp, name)); err != nil {
+		return fmt.Errorf("unduhan gagal: %w", err)
+	}
+	if err := downloadFile(client, base+"/SHA256SUMS", filepath.Join(tmp, "SHA256SUMS")); err != nil {
+		return fmt.Errorf("checksum tidak bisa diunduh: %w", err)
+	}
+	if err := verifySHA256(filepath.Join(tmp, name), filepath.Join(tmp, "SHA256SUMS")); err != nil {
+		return fmt.Errorf("checksum tidak cocok: %w", err)
+	}
+
+	// Ekstrak jenderalcode & jc, ganti binary atomik (rename dari file .new).
+	f, err := os.Open(filepath.Join(tmp, name))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	gz, err := gzip.NewReader(f)
+	if err != nil {
+		return err
+	}
+	defer gz.Close()
+	want := map[string]string{"jenderalcode": exe, "jc": filepath.Join(filepath.Dir(exe), "jc")}
+	tr := tar.NewReader(gz)
+	replaced := 0
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		dest, ok := want[filepath.Base(hdr.Name)]
+		if !ok || hdr.Typeflag != tar.TypeReg {
+			continue
+		}
+		newPath := dest + ".new"
+		out, err := os.OpenFile(newPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(hdr.Mode)&0o777)
+		if err != nil {
+			return err
+		}
+		if _, err := io.Copy(out, tr); err != nil {
+			out.Close()
+			return err
+		}
+		out.Close()
+		if err := os.Rename(newPath, dest); err != nil {
+			return fmt.Errorf("gagal mengganti %s: %w", dest, err)
+		}
+		replaced++
+	}
+	if replaced == 0 {
+		return fmt.Errorf("tarball tidak memuat binary yang diharapkan")
+	}
+	fmt.Printf("✔ binary diperbarui ke %s (%d file)\n  verifikasi dengan: jenderalcode version\n", tag, replaced)
+	return nil
+}
+
+// latestReleaseTag mengambil tag rilis terbaru dari GitHub API.
+func latestReleaseTag(client *http.Client) (string, error) {
+	resp, err := client.Get("https://api.github.com/repos/" + ghRepo + "/releases/latest")
+	if err != nil {
+		return "", fmt.Errorf("tidak bisa menghubungi GitHub: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("GitHub API status %d", resp.StatusCode)
+	}
+	var rel struct {
+		TagName string `json:"tag_name"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&rel); err != nil {
+		return "", err
+	}
+	if rel.TagName == "" {
+		return "", fmt.Errorf("belum ada rilis di GitHub")
+	}
+	return rel.TagName, nil
+}
+
+func downloadFile(client *http.Client, url, dest string) error {
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("status %d untuk %s", resp.StatusCode, url)
+	}
+	out, err := os.Create(dest)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	_, err = io.Copy(out, resp.Body)
+	return err
+}
+
+// verifySHA256 membandingkan sha256 file dengan entri di file SHA256SUMS.
+func verifySHA256(path, sumsPath string) error {
+	b, err := os.ReadFile(sumsPath)
+	if err != nil {
+		return err
+	}
+	want := ""
+	name := filepath.Base(path)
+	for _, ln := range strings.Split(string(b), "\n") {
+		fields := strings.Fields(ln)
+		if len(fields) == 2 && fields[1] == name {
+			want = fields[0]
+		}
+	}
+	if want == "" {
+		return fmt.Errorf("entri %s tidak ada di SHA256SUMS", name)
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return err
+	}
+	got := hex.EncodeToString(h.Sum(nil))
+	if got != want {
+		return fmt.Errorf("%s ≠ %s", got, want)
+	}
+	return nil
 }

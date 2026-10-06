@@ -126,7 +126,7 @@ JENDERAL_MOCK=1 jenderalcodecode run "buatkan file demo" --yolo
 | `/skills` (di TUI) | Aktif/nonaktifkan skill; skill bawaan `buat-dokumen` membuat .docx/.pptx/.xlsx/.csv/.md dari chat |
 | `jenderalcode stats` | Ringkasan token & biaya per hari/model |
 | `jenderalcode upgrade` | Periksa versi terbaru |
-| `jenderalcode update [--check] [--force]` | Update binary jika commit remote berbeda; tarik source lalu build ulang |
+| `jenderalcode update [--check] [--force]` | Update mandiri: dari source repo (git pull + build) atau dari GitHub Releases bila source tidak ditemukan |
 | `jenderalcode version` | Info versi |
 
 ## TUI

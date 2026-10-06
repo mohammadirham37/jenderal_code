@@ -217,7 +217,12 @@ func (m *Model) viewList(title string, lines []string, idx int) string {
 			cursor = "▸ "
 			style = lipgloss.NewStyle().Foreground(m.th.Primary).Bold(true)
 		}
-		b.WriteString(style.Render(cursor+lines[i]) + "\n")
+		// Bungkus baris panjang agar tidak meluber keluar dialog.
+		inner := m.width - 20
+		if inner < 30 {
+			inner = 30
+		}
+		b.WriteString(style.Render(strings.Join(wrapANSI(cursor+lines[i], inner), "\n")) + "\n")
 	}
 	if len(lines) == 0 {
 		b.WriteString(m.th.MutedStyle().Render("(kosong)") + "\n")

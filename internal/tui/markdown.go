@@ -6,10 +6,12 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mattn/go-runewidth"
 )
 
 // renderMarkdown adalah renderer Markdown ringan untuk TUI: heading,
 // list, blok kode berbingkai, diff berwarna, bold/italic/inline-code.
+// Semua baris dibungkus ke lebar layar (wrapANSI).
 // Cukup untuk kebutuhan chat tanpa dependensi berat.
 func renderMarkdown(src string, th Theme, width int) string {
 	if width < 20 {
@@ -29,13 +31,15 @@ func renderMarkdown(src string, th Theme, width int) string {
 		}
 		body := ""
 		for _, l := range codeBuf {
+			styled := l
 			switch {
 			case strings.HasPrefix(l, "+") && !strings.HasPrefix(l, "+++"):
-				body += lipgloss.NewStyle().Foreground(th.DiffAdd).Render(l) + "\n"
+				styled = lipgloss.NewStyle().Foreground(th.DiffAdd).Render(l)
 			case strings.HasPrefix(l, "-") && !strings.HasPrefix(l, "---"):
-				body += lipgloss.NewStyle().Foreground(th.DiffDel).Render(l) + "\n"
-			default:
-				body += l + "\n"
+				styled = lipgloss.NewStyle().Foreground(th.DiffDel).Render(l)
+			}
+			for _, w := range wrapANSI(styled, inner-2) {
+				body += w + "\n"
 			}
 		}
 		title := codeLang
@@ -78,29 +82,128 @@ func codeStyle(th Theme) lipgloss.Style {
 }
 
 // renderLine merender satu baris Markdown ke slice baris keluaran.
+// Semua hasil dibungkus wrapANSI agar tidak melewati lebar layar.
 func renderLine(ln string, th Theme, width int) []string {
+	inner := width - 4
+	wrap := func(s string) []string { return wrapANSI(s, inner) }
 	switch {
 	case strings.HasPrefix(ln, "### "):
-		return []string{headerStyle(th, 3).Render(inline(ln[4:], th)), ""}
+		return append(wrap(headerStyle(th, 3).Render(inline(ln[4:], th))), "")
 	case strings.HasPrefix(ln, "## "):
-		return []string{headerStyle(th, 2).Render(inline(ln[3:], th)), ""}
+		return append(wrap(headerStyle(th, 2).Render(inline(ln[3:], th))), "")
 	case strings.HasPrefix(ln, "# "):
-		return []string{headerStyle(th, 1).Render(inline(ln[2:], th)), ""}
+		return append(wrap(headerStyle(th, 1).Render(inline(ln[2:], th))), "")
 	case strings.HasPrefix(ln, "- ") || strings.HasPrefix(ln, "* "):
-		return []string{"  " + th.MutedStyle().Render("• ") + inline(ln[2:], th)}
+		return wrap("  " + th.MutedStyle().Render("• ") + inline(ln[2:], th))
 	case len(ln) > 2 && ln[0] >= '0' && ln[0] <= '9' && (ln[1] == '.' || ln[1] == ')'):
-		return []string{"  " + th.MutedStyle().Render(ln[:2]) + " " + inline(strings.TrimSpace(ln[2:]), th)}
+		return wrap("  " + th.MutedStyle().Render(ln[:2]) + " " + inline(strings.TrimSpace(ln[2:]), th))
 	case strings.HasPrefix(ln, "> "):
-		return []string{th.MutedStyle().Render("│ " + inline(ln[2:], th))}
+		return wrap(th.MutedStyle().Render("│ " + inline(ln[2:], th)))
 	case strings.HasPrefix(ln, "+") && !strings.HasPrefix(ln, "+++"):
-		return []string{lipgloss.NewStyle().Foreground(th.DiffAdd).Render(inline(ln, th))}
+		return wrap(lipgloss.NewStyle().Foreground(th.DiffAdd).Render(inline(ln, th)))
 	case strings.HasPrefix(ln, "-") && !strings.HasPrefix(ln, "---"):
-		return []string{lipgloss.NewStyle().Foreground(th.DiffDel).Render(inline(ln, th))}
+		return wrap(lipgloss.NewStyle().Foreground(th.DiffDel).Render(inline(ln, th)))
 	case strings.TrimSpace(ln) == "":
 		return []string{""}
 	default:
-		return []string{inline(ln, th)}
+		return wrap(inline(ln, th))
 	}
+}
+
+var reSGR = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+
+// wrapANSI membungkus string (yang mungkin mengandung kode ANSI) ke lebar
+// tertentu, memotong di batas kata. Status warna yang sedang terbuka
+// diteruskan ke baris berikutnya, sehingga teks bold berlanjut benar.
+func wrapANSI(s string, width int) []string {
+	if width < 8 {
+		width = 8
+	}
+	type atom struct {
+		r   rune
+		sgr string // status warna aktif saat rune ini
+		w   int
+	}
+	var atoms []atom
+	sgr := ""
+	applySGR := func(seq string) {
+		if !strings.HasSuffix(seq, "m") {
+			return // bukan SGR (mis. erase) — abaikan untuk pewarnaan
+		}
+		params := seq[2 : len(seq)-1]
+		if params == "0" || params == "" {
+			sgr = ""
+			return
+		}
+		if !strings.Contains(sgr, seq) {
+			sgr += seq
+		}
+	}
+	last := 0
+	for _, m := range reSGR.FindAllStringIndex(s, -1) {
+		for _, r := range s[last:m[0]] {
+			atoms = append(atoms, atom{r: r, sgr: sgr, w: runewidth.RuneWidth(r)})
+		}
+		applySGR(s[m[0]:m[1]])
+		last = m[1]
+	}
+	for _, r := range s[last:] {
+		atoms = append(atoms, atom{r: r, sgr: sgr, w: runewidth.RuneWidth(r)})
+	}
+
+	var out []string
+	var cur strings.Builder
+	curW, emitted := 0, ""
+	closeLine := func() {
+		if emitted != "" {
+			cur.WriteString("\x1b[0m")
+		}
+		out = append(out, cur.String())
+		cur.Reset()
+		curW, emitted = 0, ""
+	}
+	writeAtom := func(a atom) {
+		if a.sgr != emitted {
+			cur.WriteString(a.sgr)
+			emitted = a.sgr
+		}
+		cur.WriteRune(a.r)
+		curW += a.w
+	}
+
+	i := 0
+	for i < len(atoms) {
+		// Spasi: lewati di awal baris, pemisah kata.
+		if atoms[i].r == ' ' {
+			if curW > 0 && curW+1 <= width {
+				writeAtom(atoms[i])
+			}
+			i++
+			continue
+		}
+		// Kumpulkan satu kata.
+		j := i
+		wordW := 0
+		for j < len(atoms) && atoms[j].r != ' ' {
+			wordW += atoms[j].w
+			j++
+		}
+		if curW > 0 && curW+wordW > width {
+			closeLine()
+		}
+		// Kata lebih panjang dari lebar: potong paksa per karakter.
+		for k := i; k < j; k++ {
+			if curW+atoms[k].w > width && curW > 0 {
+				closeLine()
+			}
+			writeAtom(atoms[k])
+		}
+		i = j
+	}
+	if curW > 0 || len(out) == 0 {
+		closeLine()
+	}
+	return out
 }
 
 func headerStyle(th Theme, level int) lipgloss.Style {

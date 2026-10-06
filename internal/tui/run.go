@@ -42,6 +42,10 @@ func Run(app *AppContext, sess *session.Session, mcpLog func(string), programOpt
 	programRef = p
 	m.SetProgram(p)
 	m.ag = ag
+	// Agen awal juga butuh resolver dialog izin (agen hasil /new atau pindah
+	// sesi memasangnya sendiri di newAgentFor); tanpa ini semua permintaan
+	// izin auto-ditolak di mode BUILD.
+	ag.PermResolver = m.permResolver()
 
 	// Pompa event bus → program.
 	subID, evCh := b.Subscribe()

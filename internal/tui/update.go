@@ -264,13 +264,19 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				m.permIdx++
 			}
 		case "1", "2", "3":
-			m.permIdx = int(key[1] - '1')
+			m.permIdx = int(key[0] - '1')
 			return m, m.answerPerm()
 		case "enter":
 			return m, m.answerPerm()
 		case "esc", "q":
 			m.permIdx = 2
 			return m, m.answerPerm()
+		case "ctrl+c":
+			// Keluar dari aplikasi saat dialog izin terbuka: tolak dulu
+			// agar agen yang menunggu tidak menggantung, lalu quit.
+			m.permIdx = 2
+			cmd := m.answerPerm()
+			return m, tea.Batch(cmd, tea.Quit)
 		}
 		return m, nil
 

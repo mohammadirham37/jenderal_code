@@ -29,6 +29,7 @@ type Mode string
 const (
 	ModeBuild Mode = "build"
 	ModePlan  Mode = "plan"
+	ModeFull  Mode = "full" // akses penuh: semua izin disetujui otomatis
 )
 
 // PermRequest permintaan izin yang diteruskan ke antarmuka pengguna.
@@ -168,25 +169,38 @@ func (a *Agent) SetModel(ref string) error {
 	}
 	a.Model = ref
 	_ = a.Store.SetModel(a.Sess.ID, ref)
+	// Ingat pilihan terakhir lintas sesi/aplikasi.
+	config.SetState("last_model", ref)
 	a.publish(bus.Event{Type: bus.EventModelChanged, Text: ref})
 	return nil
 }
 
-// ToggleMode menukar Build ↔ Plan dan menyiarkan event.
+// ToggleMode menyikluskan Build → Plan → Full Access dan menyiarkan event.
 func (a *Agent) ToggleMode() Mode {
-	if a.Mode == ModeBuild {
+	switch a.Mode {
+	case ModeBuild:
 		a.Mode = ModePlan
-	} else {
+	case ModePlan:
+		a.Mode = ModeFull
+	default:
 		a.Mode = ModeBuild
 	}
+	a.syncPerm()
 	a.publish(bus.Event{Type: bus.EventModeChanged, Text: string(a.Mode)})
 	return a.Mode
 }
 
-// SetMode memaksa mode tertentu.
+// SetMode memaksa mode tertentu dan menyelaraskan izin otomatis.
 func (a *Agent) SetMode(m Mode) {
 	a.Mode = m
+	a.syncPerm()
 	a.publish(bus.Event{Type: bus.EventModeChanged, Text: string(m)})
+}
+
+// syncPerm menyelaraskan persetujuan otomatis dengan mode: full access
+// menyetujui semua izin, mode lain kembali mengikuti aturan konfigurasi.
+func (a *Agent) syncPerm() {
+	a.Perm.SetYolo(a.Mode == ModeFull)
 }
 
 // CostUSD total biaya sesi berjalan (USD).

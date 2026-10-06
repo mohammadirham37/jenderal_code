@@ -115,7 +115,7 @@ JENDERAL_MOCK=1 jenderalcodecode run "buatkan file demo" --yolo
 | Perintah | Fungsi |
 | --- | --- |
 | `jenderalcode` | TUI interaktif di folder saat ini (`--continue`, `--session`) |
-| `jenderalcode run "<prompt>"` | Tugas non-interaktif; flag `--json --model --agent --yolo --mode plan` |
+| `jenderalcode run "<prompt>"` | Tugas non-interaktif; flag `--json --model --agent --yolo --mode plan\|full` |
 | `jenderalcode serve --port 4096` | API HTTP+SSE lokal (127.0.0.1, token acak) |
 | `jenderalcode auth login\|logout\|list` | Kredensial provider (keychain OS, fallback file aman) |
 | `jenderalcode models [--refresh]` | Daftar model + harga; `--refresh` ambil terbaru |
@@ -135,7 +135,7 @@ JENDERAL_MOCK=1 jenderalcodecode run "buatkan file demo" --yolo
 | --- | --- |
 | `Enter` | Kirim pesan |
 | `Ctrl+J` | Baris baru |
-| `Tab` | Tukar mode Build ↔ Plan |
+| `Tab` | Siklus mode: BUILD (ask) → PLAN → FULL ACCESS (tanpa dialog) |
 | `Esc` | Hentikan agen yang berjalan |
 | `Ctrl+M` | Pilih model |
 | `Ctrl+S` | Daftar sesi |

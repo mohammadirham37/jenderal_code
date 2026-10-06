@@ -372,7 +372,7 @@ func (m *Model) handleSlash(input string) bool {
 		m.agentIdx = 0
 		m.view = viewAgents
 	case "new":
-		if sess, err := m.app.Store.CreateSession(m.ag.Sess.ProjectPath, "", m.app.Cfg.Model()); err == nil {
+		if sess, err := m.app.Store.CreateSession(m.ag.Sess.ProjectPath, "", config.LastModel(m.app.Cfg.Model())); err == nil {
 			if newAg, err := m.newAgentFor(sess); err == nil {
 				m.ag = newAg
 				m.blocks = []chatBlock{{kind: "banner"}}

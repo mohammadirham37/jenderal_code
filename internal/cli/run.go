@@ -17,6 +17,7 @@ import (
 	"github.com/mohammadirham37/jenderal_code/catalog"
 	"github.com/mohammadirham37/jenderal_code/internal/agent"
 	"github.com/mohammadirham37/jenderal_code/internal/bus"
+	"github.com/mohammadirham37/jenderal_code/internal/config"
 	"github.com/mohammadirham37/jenderal_code/internal/mcp"
 	"github.com/mohammadirham37/jenderal_code/internal/permission"
 	"github.com/mohammadirham37/jenderal_code/internal/provider"
@@ -125,6 +126,9 @@ func runCmd() *cobra.Command {
 			switch strings.ToLower(mode) {
 			case "plan":
 				ag.SetMode(agent.ModePlan)
+			case "full":
+				ag.SetMode(agent.ModeFull)
+				fmt.Fprintln(os.Stderr, "⚠ mode full access: SEMUA izin disetujui otomatis. Gunakan hanya di lingkungan terpercaya.")
 			}
 			if agentN != "" {
 				if err := ag.SwitchAgent(agentN); err != nil {
@@ -255,7 +259,7 @@ func runCmd() *cobra.Command {
 	cmd.Flags().BoolVar(&yolo, "yolo", false, "setujui semua izin otomatis (hanya sandbox/CI)")
 	cmd.Flags().StringVar(&sessID, "session", "", "lanjutkan sesi tertentu")
 	cmd.Flags().BoolVar(&cont, "continue", false, "lanjutkan sesi terakhir")
-	cmd.Flags().StringVar(&mode, "mode", "build", "mode agen: build | plan")
+	cmd.Flags().StringVar(&mode, "mode", "build", "mode agen: build | plan | full")
 	return cmd
 }
 
@@ -376,7 +380,7 @@ func launchTUI(a *app, continueLast bool, sessID string) error {
 		}
 	}
 	if sess == nil {
-		sess, err = a.store.CreateSession(a.dir, "", a.cfg.Model())
+		sess, err = a.store.CreateSession(a.dir, "", config.LastModel(a.cfg.Model()))
 		if err != nil {
 			return err
 		}

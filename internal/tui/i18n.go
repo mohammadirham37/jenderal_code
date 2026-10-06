@@ -7,6 +7,7 @@ var dicts = map[string]T{
 	"id": {
 		"mode_build":          "BUILD",
 		"mode_plan":           "PLAN",
+		"mode_full":           "FULL ACCESS",
 		"thinking":            "berpikir…",
 		"thinking_done":       "✻ berpikir selesai",
 		"send_hint":           "Enter kirim · Tab mode · Ctrl+M model · Ctrl+S sesi · Ctrl+K perintah · /help bantuan",
@@ -63,6 +64,7 @@ var dicts = map[string]T{
 	"en": {
 		"mode_build":          "BUILD",
 		"mode_plan":           "PLAN",
+		"mode_full":           "FULL ACCESS",
 		"thinking":            "thinking…",
 		"thinking_done":       "✻ finished thinking",
 		"send_hint":           "Enter send · Tab mode · Ctrl+M model · Ctrl+S sessions · Ctrl+K commands · /help",

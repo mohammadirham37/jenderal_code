@@ -63,7 +63,7 @@ func TestWriteDocx(t *testing.T) {
 		t.Fatal("tool write_docx tidak terdaftar")
 	}
 	out, err := res.Exec(context.Background(), map[string]any{
-		"path": path,
+		"path":    path,
 		"content": "# Laporan Q3\n\n## Ringkasan\n- Pendapatan **naik** 12%\n- Biaya `turun`\n\n1. Pertama\n2. Kedua\n\n```go\nfmt.Println(\"halo\")\n```\n\n| Bulan | Nilai |\n|---|---|\n| Juli | 100 |\n| Agustus | 200 |\n",
 	})
 	if err != nil || out.Err {

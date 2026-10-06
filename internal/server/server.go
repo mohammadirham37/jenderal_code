@@ -424,7 +424,7 @@ func (s *Server) setModel(w http.ResponseWriter, r *http.Request) {
 func (s *Server) setMode(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	var body struct {
-		Mode string `json:"mode"` // build | plan | toggle
+		Mode string `json:"mode"` // build | plan | full | toggle
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeJSON(w, 400, map[string]string{"error": "JSON tidak valid"})
@@ -440,6 +440,8 @@ func (s *Server) setMode(w http.ResponseWriter, r *http.Request) {
 		ag.SetMode(agent.ModeBuild)
 	case "plan":
 		ag.SetMode(agent.ModePlan)
+	case "full":
+		ag.SetMode(agent.ModeFull)
 	default:
 		ag.ToggleMode()
 	}

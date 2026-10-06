@@ -100,9 +100,13 @@ func (m *Model) statusBar() string {
 		model = m.lang.get("no_key")
 	}
 	mode := m.lang.get("mode_build")
-	if m.ag.Mode == "plan" {
+	switch m.ag.Mode {
+	case "plan":
 		mode = lipgloss.NewStyle().Background(m.th.Secondary).Foreground(lipgloss.Color("#000000")).
 			Render(m.lang.get("mode_plan"))
+	case "full":
+		mode = lipgloss.NewStyle().Background(m.th.Error).Foreground(lipgloss.Color("#FFFFFF")).
+			Bold(true).Render(m.lang.get("mode_full"))
 	}
 	left := fmt.Sprintf(" %s │ %s │ ", model, mode)
 	ctx := m.contextInfo()

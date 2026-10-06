@@ -33,6 +33,9 @@ func (a *Agent) buildSystemPrompt() string {
 		b.WriteString("## Mode: PLAN\nAnda berada dalam mode perencanaan: tool yang mengubah file/perintah tidak tersedia. ")
 		b.WriteString("Baca kode yang relevan, lalu sampaikan rencana implementasi yang konkret (file apa diubah, langkah berurutan, risiko). ")
 		b.WriteString("Pengguna akan beralih ke mode Build (Tab) untuk mengeksekusi rencana.\n\n")
+	case ModeFull:
+		b.WriteString("## Mode: FULL ACCESS\nSemua izin (tulis file, perintah) disetujui otomatis tanpa dialog. ")
+		b.WriteString("Kerjakan tugas sampai selesai tanpa bertanya, tetap minimalis, dan tetap sebutkan perubahan yang Anda lakukan.\n\n")
 	default:
 		b.WriteString("## Mode: BUILD\nAnda boleh membaca dan mengubah file. Setiap perubahan file dan perintah berisiko memerlukan persetujuan pengguna — bila ditolak, jangan ulangi. ")
 		b.WriteString("Kerjakan tugas sampai selesai, tetapi tetap minimalis: jangan buat file yang tidak diminta.\n\n")

@@ -37,6 +37,13 @@ endpoint OpenAI-compatible lain — semuanya lewat satu binary tanpa runtime Nod
   `jenderalcode init` membuatnya dari analisis repo; referensi `@path/ke/file`.
 - **Custom agent & command** — `.jenderal/agents/*.md` (system prompt + model +
   daftar tool) dan `.jenderal/commands/*.md` (slash command kustom).
+- **Pembuatan dokumen dari chat** — agen bisa membuat `.docx`, `.pptx`,
+  `.xlsx`, `.csv`, dan `.md` langsung (tool `write_docx`, `write_pptx`,
+  `write_xlsx`); panduannya ada di skill bawaan `buat-dokumen`.
+- **Skills** — paket instruksi dari `internal/skills` (bawaan tertanam),
+  `.jenderal/skills/` proyek, atau `~/.config/jenderalcode/skills/` global;
+  aktifkan lewat `/skills` di TUI atau biarkan agen memuatnya via tool
+  `use_skill`.
 - **MCP client** — server lokal (stdio) dan remote (HTTP); tool MCP otomatis
   jadi tool agen (`mcp__server__tool`).
 - **Server API lokal** — `jenderalcode serve` membuka HTTP + SSE di `127.0.0.1`
@@ -108,6 +115,7 @@ JENDERAL_MOCK=1 jenderalcodecode run "buatkan file demo" --yolo
 | `jenderalcode mcp add\|list\|rm` | Kelola server MCP |
 | `jenderalcode init` | Buat `JENDERAL.md` dari analisis repo |
 | `/provider` (di TUI) | Konek ke provider AI: daftar provider + status, isi API key, pilih model |
+| `/skills` (di TUI) | Aktif/nonaktifkan skill; skill bawaan `buat-dokumen` membuat .docx/.pptx/.xlsx/.csv/.md dari chat |
 | `jenderalcode stats` | Ringkasan token & biaya per hari/model |
 | `jenderalcode upgrade` | Periksa versi terbaru |
 | `jenderalcode update [--check] [--force]` | Update binary jika commit remote berbeda; tarik source lalu build ulang |

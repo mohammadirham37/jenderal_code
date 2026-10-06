@@ -15,5 +15,9 @@ func NewBuiltinRegistry(projDir string, ignore *Ignore, todos *TodoStore, bashTi
 	r.Add(webfetchTool{})
 	r.Add(todoTool{store: todos})
 	r.Add(lspTool{})
+	// Pembuat dokumen: .docx, .pptx, .xlsx (.md/.csv lewat tool write).
+	r.Add(docxTool{b})
+	r.Add(pptxTool{b})
+	r.Add(xlsxTool{b})
 	return r
 }

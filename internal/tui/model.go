@@ -20,6 +20,7 @@ import (
 	"github.com/mohammadirham37/jenderal_code/internal/config"
 	"github.com/mohammadirham37/jenderal_code/internal/provider"
 	"github.com/mohammadirham37/jenderal_code/internal/session"
+	"github.com/mohammadirham37/jenderal_code/internal/skills"
 )
 
 // AppContext dependensi aplikasi yang dibagikan ke TUI.
@@ -47,6 +48,7 @@ const (
 	viewModel
 	viewProvider
 	viewProviderKey
+	viewSkills
 	viewSessions
 	viewAgents
 	viewPalette
@@ -105,6 +107,8 @@ type Model struct {
 	provIdx         int
 	provKeyInput    textinput.Model
 	provKeyFor      string // provider yang sedang diisi API key-nya
+	skillList       []skills.Skill
+	skillIdx        int
 	sessions        []session.Session
 	sessIdx         int
 	agentsAll       []*agent.CustomAgent
@@ -178,6 +182,7 @@ func (m *Model) buildPalette() {
 	m.palette = []paletteItem{
 		{"/model", "pilih model"},
 		{"/provider", "konek ke provider AI"},
+		{"/skills", "aktifkan skill"},
 		{"/agent", "pilih custom agent"},
 		{"/new", "sesi baru"},
 		{"/sessions", "daftar sesi"},
@@ -355,6 +360,10 @@ func (m *Model) handleSlash(input string) bool {
 	case "provider":
 		m.buildProviderList()
 		m.view = viewProvider
+	case "skills":
+		m.skillList = m.ag.ListSkills()
+		m.skillIdx = 0
+		m.view = viewSkills
 	case "agent":
 		m.loadAgents()
 		m.agentIdx = 0

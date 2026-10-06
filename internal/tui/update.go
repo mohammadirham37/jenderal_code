@@ -320,6 +320,40 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
+	case viewSkills:
+		switch key {
+		case "up", "k":
+			if m.skillIdx > 0 {
+				m.skillIdx--
+			}
+		case "down", "j":
+			if m.skillIdx < len(m.skillList)-1 {
+				m.skillIdx++
+			}
+		case "enter":
+			if m.skillIdx < len(m.skillList) {
+				sk := m.skillList[m.skillIdx]
+				active := false
+				for _, n := range m.ag.ActiveSkills() {
+					if n == sk.Name {
+						active = true
+						break
+					}
+				}
+				if active {
+					m.ag.DeactivateSkill(sk.Name)
+					m.statusMsg = m.lang.get("skill_off") + " " + sk.Name
+				} else if err := m.ag.ActivateSkill(sk.Name); err == nil {
+					m.statusMsg = m.lang.get("skill_on") + " " + sk.Name
+				} else {
+					m.statusMsg = err.Error()
+				}
+			}
+		case "esc", "q":
+			m.view = viewChat
+		}
+		return m, nil
+
 	case viewProviderKey:
 		switch key {
 		case "esc":

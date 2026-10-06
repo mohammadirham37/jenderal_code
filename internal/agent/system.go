@@ -59,6 +59,8 @@ func (a *Agent) buildSystemPrompt() string {
 		b.WriteString(strings.TrimSpace(a.custom.Prompt) + "\n\n")
 	}
 
+	a.appendSkills(&b)
+
 	if rules := projectRules(a.Sess.ProjectPath); rules != "" {
 		b.WriteString("## Aturan proyek\n" + rules + "\n")
 	}

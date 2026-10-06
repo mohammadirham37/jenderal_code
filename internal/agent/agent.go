@@ -82,6 +82,9 @@ type Agent struct {
 
 	custom     *CustomAgent    // custom agent aktif (nil = default)
 	toolFilter map[string]bool // batasi tool (custom agent); nil = semua
+
+	skillsMu     sync.Mutex
+	activeSkills []string // skill yang diaktifkan pengguna (/skills)
 }
 
 // Options opsi pembuatan Agent.
@@ -120,6 +123,7 @@ func New(o Options) (*Agent, error) {
 	}
 	ag.SmallModel = cfg.SmallModel()
 	ag.Tools = tool.NewBuiltinRegistry(projDir, ignore, todos, cfg.BashTimeout())
+	ag.Tools.Add(skillTool{ag: ag})
 	// Tool task (sub-agen) hanya untuk agen utama — tidak bersarang.
 	if o.Depth == 0 {
 		ag.Tools.Add(taskTool{ag: ag})

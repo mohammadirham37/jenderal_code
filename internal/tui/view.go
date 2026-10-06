@@ -38,6 +38,20 @@ func (m *Model) View() string {
 		return m.viewProviderDialog()
 	case viewProviderKey:
 		return m.viewProviderKeyDialog()
+	case viewSkills:
+		lines := make([]string, len(m.skillList))
+		active := map[string]bool{}
+		for _, n := range m.ag.ActiveSkills() {
+			active[n] = true
+		}
+		for i, sk := range m.skillList {
+			mark := "  "
+			if active[sk.Name] {
+				mark = "★ "
+			}
+			lines[i] = mark + sk.Name + " — " + sk.Description
+		}
+		return m.viewList(m.lang.get("skills_title"), lines, m.skillIdx)
 	case viewModel:
 		return m.viewList(m.lang.get("model_title"), m.modelLines(), m.modelIdx)
 	case viewSessions:
@@ -350,7 +364,7 @@ func (m *Model) viewProviderKeyDialog() string {
 	}
 	var b strings.Builder
 	title := lipgloss.NewStyle().Foreground(m.th.Primary).Bold(true).
-		Render("⬢ "+m.lang.get("provider_key_title")+" "+name)
+		Render("⬢ " + m.lang.get("provider_key_title") + " " + name)
 	b.WriteString(title + m.th.MutedStyle().Render("  ·  "+id) + "\n\n")
 	b.WriteString(m.th.MutedStyle().Render(m.lang.get("provider_key_hint")) + "\n\n")
 	b.WriteString(m.provKeyInput.View() + "\n")
